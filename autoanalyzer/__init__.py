@@ -1,0 +1,1 @@
+from autoanalyzer.table_creator import TableCreator
