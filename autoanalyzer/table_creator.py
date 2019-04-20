@@ -4,12 +4,12 @@ VTYPES = ['unary', 'binary', 'ordered', 'numeric', 'category']
 
 class TableCreator():
     def __init__(
-            self, df=None, y=None, X=None, summary=None, 
+            self, df=None, y=None, X=None, sum_vars=None, 
             vgroups=None, hgroups=None):
         self.set_df(df)
         self.set_y(y)
         self.set_X(X)
-        self.set_summary(summary)
+        self.set_sum_vars(sum_vars)
         self.set_vgroups(vgroups)
         self.set_hgroups(hgroups)
         
@@ -40,13 +40,13 @@ class TableCreator():
             X = [X]
         self.X = X
         
-    # Set the summary variables
-    # i.e. variables whose summary stats are displayed in the table
-    # summary: string (variable name) or list of variable names or None
-    def set_summary(self, summary):
-        if type(summary) == str:
-            summary = [summary]
-        self.summary = summary
+    # Set the sum_vars variables
+    # i.e. variables whose sum_vars stats are displayed in the table
+    # sum_vars: string (variable name) or list of variable names or None
+    def set_sum_vars(self, sum_vars):
+        if type(sum_vars) == str:
+            sum_vars = [sum_vars]
+        self.sum_vars = sum_vars
         
     # Set the vertical groupings
     # i.e. list of vars to use as groupings along the table's vertical axis
@@ -136,7 +136,7 @@ class TableCreator():
         self._infer_pctiles(vars, group_pctiles=True)
         
     # Set cell percentiles
-    # i.e. percentiles to use as cutoffs when displaying summary stats in cell
+    # i.e. percentiles to use as cutoffs when displaying sum_vars stats in cell
     # pctiles: {'var_name':[percentiles]}
     def set_cell_pctiles(self, pctiles):
         self._set_pctiles(pctiles, group_pctiles=False)
@@ -177,9 +177,9 @@ class TableCreator():
     
     # Create table
     # collect vgroup vars {vgroup: {}}
-    # collect vgroup values {vgroup_var: {val: {}}}
-    # collect summary variables {vgroup_var: {val: {sum_var: {}}}}
-    # collect summary stats {vgroup_var: {val: {sum_var: {
+    # collect vgroup subgroups {vgroup_var: {sg: {}}}
+    # collect sum_vars variables {vgroup_var: {sg: {sum_var: {}}}}
+    # collect sum_vars stats {vgroup_var: {sg: {sum_var: {
         # mean: xxx,
         # std: xxx,
         # skewness: xxx,
@@ -188,19 +188,20 @@ class TableCreator():
         # categories: {category_i: xxx}
         # }}}}
     def create_table(self):
-        self._get_summary_stats()
-        return sum_stats
+        self._get_sum_stats()
+        return self.sum_stats
         
-    # Compute summary statistics
-    def _get_summary_stats(self):
-        self.sum_stats = {vgroup_var: {} for vgroup_var in self.vgroups}
+    # Compute sum_vars statistics
+    def _get_sum_stats(self):
+        self.sum_stats = {vgroup_var: {} 
+            for vgroup_var in self.vgroups+['pooled']}
         [self._get_stats_by_vgroup(vgroup_var) for vgroup_var in self.vgroups]
-        self._get_stats_by_value('pooled', self.sum_stats, pooled=True)
+        self._get_stats_by_value('---', self.sum_stats['pooled'], pooled=True)
         
-    # Compute summary stats by vgroup variable
+    # Compute sum_vars stats by vgroup variable
     # vgroup_var: from self.vgroups
     # create a series indicating membership to subgroup based on vgroup_var
-    # compute summary stats for each subgroup
+    # compute sum_vars stats for each subgroup
     def _get_stats_by_vgroup(self, vgroup_var):
         if self.vars[vgroup_var]['type'] != 'numeric':
             series = self.df[vgroup_var]
@@ -213,12 +214,12 @@ class TableCreator():
         [self._get_stats_by_value(sg, self.sum_stats[vgroup_var], series) 
             for sg in subgroups]
             
-    # Compute summary stats in subgroup
+    # Compute sum_vars stats in subgroup
     # sg: subgroup
     # vgroup_dict: {vgroup_var: {}}
     # series: indicates membership to subgroup
     def _get_stats_by_value(self, sg, vgroup_dict, series=None, pooled=False):
-        vgroup_dict[sg] = {sum_var: {} for sum_var in self.summary}
+        vgroup_dict[sg] = {sum_var: {} for sum_var in self.sum_vars}
         if pooled:
             temp_df = self.df
         else:
@@ -228,23 +229,23 @@ class TableCreator():
         self._std(vgroup_dict[sg], temp_df)
         
     # Compute number of observations N
-    # sg_dict: {subgroup: {summary variable: {}}}
+    # sg_dict: {subgroup: {sum_vars variable: {}}}
     # temp_df: df containing only members of subgroup
     def _N(self, sg_dict, temp_df):
-        vars = self.summary
+        vars = self.sum_vars
         counts = temp_df[vars].count()
         for var in vars:
             sg_dict[var]['N'] = counts[var]
         
     def _mean(self, sg_dict, temp_df):
-        vars = [v for v in self.summary 
+        vars = [v for v in self.sum_vars 
             if self.vars[v]['type'] != 'category']
         means = temp_df[vars].mean()
         for var in vars:
             sg_dict[var]['mean'] = means[var]
             
     def _std(self, sg_dict, temp_df):
-        vars = [v for v in self.summary
+        vars = [v for v in self.sum_vars
             if self.vars[v]['type'] != 'category']
         stds = temp_df[vars].std()
         for var in vars:
