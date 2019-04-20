@@ -1,18 +1,23 @@
 import pandas as pd
 
+VTYPES = ['unary', 'binary', 'ordered', 'numeric', 'category']
+
 class TableCreator():
     def __init__(
-            self, df=None, y=None, X=None, additional=None, 
+            self, df=None, y=None, X=None, summary=None, 
             vgroups=None, hgroups=None):
         self.set_df(df)
         self.set_y(y)
         self.set_X(X)
-        self.set_additional(additional)
+        self.set_summary(summary)
         self.set_vgroups(vgroups)
         self.set_hgroups(hgroups)
+        
         self.vars = {}
         self.infer_labels()
         self.infer_types()
+        self.infer_group_pctiles()
+        self.infer_cell_pctiles()
         
     # Set the dataframe
     # df: pandas data frame or None
@@ -35,13 +40,13 @@ class TableCreator():
             X = [X]
         self.X = X
         
-    # Set the additional variables
+    # Set the summary variables
     # i.e. variables whose summary stats are displayed in the table
-    # additional: string (variable name) or list of variable names or None
-    def set_additional(self, additional):
-        if type(additional) == str:
-            additional = [additional]
-        self.additional = additional
+    # summary: string (variable name) or list of variable names or None
+    def set_summary(self, summary):
+        if type(summary) == str:
+            summary = [summary]
+        self.summary = summary
         
     # Set the vertical groupings
     # i.e. list of vars to use as groupings along the table's vertical axis
@@ -62,14 +67,13 @@ class TableCreator():
         
         
     ###########################################################################
-    # Variable labels and types
+    # Variable decorators (lables, types, group and cell percentiles)
     ###########################################################################
         
-    # Set the labels for a (list of) variable(s)
-    def set_labels(self, vars, labels):
-        if type(vars) == str:
-            vars = [vars]
-        for var, label in zip(vars, labels):
+    # Set variable labels
+    # labels: {'var_name':'label'}
+    def set_labels(self, labels):
+        for var, label in labels.items():
             if var not in self.vars:
                 self.vars[var] = {}
             self.vars[var]['label'] = label
@@ -82,14 +86,13 @@ class TableCreator():
             vars = list(self.df)
         if type(vars) == str:
             vars = [vars]
-        self.set_labels(vars, vars)
+        self.set_labels({var:var for var in vars})
         
-    # Set the types for a (list of) variable(s)
-    # types are category, binary, ordered, numeric
-    def set_types(self, vars, types):
-        if type(vars) == str:
-            vars = [vars]
-        for var, t in zip(vars, types):
+    # Set variable types
+    # types: {'var name':'type'}
+    # type is unary, binary, ordered, numeric, or category
+    def set_types(self, types):
+        for var, t in types.items():
             if var not in self.vars:
                 self.vars[var] = {}
             self.vars[var]['type'] = t
@@ -104,17 +107,160 @@ class TableCreator():
             vars = list(self.df)
         if type(vars) == str:
             vars = [vars]
-        types = []
-        for v in vars:
-            values = set(self.df[v].dropna())
+        types = {}
+        for var in vars:
+            values = set(self.df[var].dropna())
             try:
-                [float(i) for i in values]
-                if len(values) == 2:
-                    types.append('binary')
-                elif len(values) < 10:
-                    types.append('ordered')
+                num_vals = len([float(i) for i in values])
+                if num_vals == 1:
+                    types[var] = 'unary'
+                elif num_vals == 2:
+                    types[var] = 'binary'
+                elif num_vals < 10:
+                    types[var] = 'ordered'
                 else:
-                    types.append('numeric')
+                    types[var] = 'numeric'
             except:
-                types.append('category')
-        self.set_types(vars, types)
+                types[var] = 'category'
+        self.set_types(types)
+        
+    # Set grouping percentiles
+    # i.e. percentiles to use as cutoffs when grouping by numeric variables
+    # pctiles: {'var_name':[percentiles]}
+    def set_group_pctiles(self, pctiles):
+        self._set_pctiles(pctiles, group_pctiles=True)
+            
+    # Infer grouping percentiles
+    # vars: variable name (string) or list of variable names or None
+    def infer_group_pctiles(self, vars=None):
+        self._infer_pctiles(vars, group_pctiles=True)
+        
+    # Set cell percentiles
+    # i.e. percentiles to use as cutoffs when displaying summary stats in cell
+    # pctiles: {'var_name':[percentiles]}
+    def set_cell_pctiles(self, pctiles):
+        self._set_pctiles(pctiles, group_pctiles=False)
+        
+    # Infer cell percentiles
+    # vars: variable name (string) or list of variable names or None
+    def infer_cell_pctiles(self, vars=None):
+        self._infer_pctiles(vars, group_pctiles=False)
+    
+    # Set percentiles
+    # pctiles: {'var_name':[percentiles]}
+    # group_pctiles: indicates whether these are group or cell percentiles
+    def _set_pctiles(self, pctiles, group_pctiles):
+        for var, pctile in pctiles.items():
+            if var not in self.vars:
+                self.vars[var] = {}
+            if group_pctiles:
+                self.vars[var]['group_pctile'] = pctile
+            else:
+                self.vars[var]['cell_pctile'] = pctile
+            
+    # Infer percentiles
+    # vars: variable name (string) or list of variable names or None
+    # group_pctiles: indicates whether these are group or cell percentiles
+    def _infer_pctiles(self, vars, group_pctiles):
+        if vars is None:
+            vars = list(self.df)
+        if type(vars) == str:
+            vars = [vars]
+        self._set_pctiles(
+            {var:[0., .25,.50,.75, 1.] for var in vars}, group_pctiles)
+        
+    
+    
+    ###########################################################################
+    # Create table
+    ###########################################################################
+    
+    # Create table
+    # collect vgroup vars {vgroup: {}}
+    # collect vgroup values {vgroup_var: {val: {}}}
+    # collect summary variables {vgroup_var: {val: {sum_var: {}}}}
+    # collect summary stats {vgroup_var: {val: {sum_var: {
+        # mean: xxx,
+        # std: xxx,
+        # skewness: xxx,
+        # kurtosis: xxx,
+        # percentiles: {quantile_i: xxx},
+        # categories: {category_i: xxx}
+        # }}}}
+    def create_table(self):
+        self._get_summary_stats()
+        return sum_stats
+        
+    # Compute summary statistics
+    def _get_summary_stats(self):
+        self.sum_stats = {vgroup_var: {} for vgroup_var in self.vgroups}
+        [self._get_stats_by_vgroup(vgroup_var) for vgroup_var in self.vgroups]
+        self._get_stats_by_value('pooled', self.sum_stats, pooled=True)
+        
+    # Compute summary stats by vgroup variable
+    # vgroup_var: from self.vgroups
+    # create a series indicating membership to subgroup based on vgroup_var
+    # compute summary stats for each subgroup
+    def _get_stats_by_vgroup(self, vgroup_var):
+        if self.vars[vgroup_var]['type'] != 'numeric':
+            series = self.df[vgroup_var]
+        else:
+            series = pd.qcut(
+                self.df[vgroup_var], self.vars[vgroup_var]['group_pctile'])
+                
+        subgroups = series.unique()
+        self.sum_stats[vgroup_var] = {sg: {} for sg in subgroups}
+        [self._get_stats_by_value(sg, self.sum_stats[vgroup_var], series) 
+            for sg in subgroups]
+            
+    # Compute summary stats in subgroup
+    # sg: subgroup
+    # vgroup_dict: {vgroup_var: {}}
+    # series: indicates membership to subgroup
+    def _get_stats_by_value(self, sg, vgroup_dict, series=None, pooled=False):
+        vgroup_dict[sg] = {sum_var: {} for sum_var in self.summary}
+        if pooled:
+            temp_df = self.df
+        else:
+            temp_df = self.df[series==sg]
+        self._N(vgroup_dict[sg], temp_df)
+        self._mean(vgroup_dict[sg], temp_df)
+        self._std(vgroup_dict[sg], temp_df)
+        
+    # Compute number of observations N
+    # sg_dict: {subgroup: {summary variable: {}}}
+    # temp_df: df containing only members of subgroup
+    def _N(self, sg_dict, temp_df):
+        vars = self.summary
+        counts = temp_df[vars].count()
+        for var in vars:
+            sg_dict[var]['N'] = counts[var]
+        
+    def _mean(self, sg_dict, temp_df):
+        vars = [v for v in self.summary 
+            if self.vars[v]['type'] != 'category']
+        means = temp_df[vars].mean()
+        for var in vars:
+            sg_dict[var]['mean'] = means[var]
+            
+    def _std(self, sg_dict, temp_df):
+        vars = [v for v in self.summary
+            if self.vars[v]['type'] != 'category']
+        stds = temp_df[vars].std()
+        for var in vars:
+            sg_dict[var]['std'] = stds[var]
+            
+    # TODO
+    def _pctiles(self, vars):
+        for var in vars:
+            pctiles = self.vars[var]['cell_pctile']
+            vals = self.df[var].quantile(pctiles)
+            self.sum_stats[var]['pctile'] = {pctile:val
+                for pctile, val in zip(pctiles, vals)}
+                
+    def _counts(self, vars):
+        for var in vars:
+            val_counts = self.df[var].value_counts()
+            N = self.sum_stats[var]['N']
+            self.sum_stats[var]['value_counts'] = {index:count/N
+                for index, count in zip(val_counts.index, val_counts)}
