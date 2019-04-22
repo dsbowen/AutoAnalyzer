@@ -51,8 +51,17 @@ class TableWriter():
         
     def _write_sum_cell(self, sum_var, sum_var_dict):
         col = self.sum_vars.index(sum_var)+1
-        cell = '{:.2f} \n ({:.2f}) \n N={}'.format(
-            sum_var_dict['mean'],
-            sum_var_dict['std'],
-            sum_var_dict['N'])
+        
+        cell = '{:.2f} \n ({:.2f}) \n'.format(
+            sum_var_dict['mean'], sum_var_dict['std'])
+            
+        try:
+            for pctile, val in sum_var_dict['pctiles']:
+                cell += 'p={}: {:.2f} \n'.format(pctile, val)
+        except:
+            for val, count, in sum_var_dict['val_counts']:
+                cell += '{}: {:.2f} \n'.format(val, count)
+                
+        cell += 'N={}'.format(sum_var_dict['N'])
+
         self._ws.write(self.row, col, cell, self._format['center'])

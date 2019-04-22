@@ -227,6 +227,8 @@ class TableCreator():
         self._N(vgroup_dict[sg], temp_df)
         self._mean(vgroup_dict[sg], temp_df)
         self._std(vgroup_dict[sg], temp_df)
+        self._pctiles(vgroup_dict[sg], temp_df)
+        self._counts(vgroup_dict[sg], temp_df)
         
     # Compute number of observations N
     # sg_dict: {subgroup: {sum_vars variable: {}}}
@@ -251,17 +253,19 @@ class TableCreator():
         for var in vars:
             sg_dict[var]['std'] = stds[var]
             
-    # TODO
-    def _pctiles(self, vars):
+    def _pctiles(self, sg_dict, temp_df):
+        vars = [v for v in self.sum_vars
+            if self.vars[v]['type'] == 'numeric']
         for var in vars:
             pctiles = self.vars[var]['cell_pctile']
-            vals = self.df[var].quantile(pctiles)
-            self.sum_stats[var]['pctile'] = {pctile:val
-                for pctile, val in zip(pctiles, vals)}
+            vals = temp_df[var].quantile(pctiles)
+            sg_dict[var]['pctiles'] = [(pctile, val) 
+                for pctile, val in zip(pctiles, vals)]
                 
-    def _counts(self, vars):
+    def _counts(self, sg_dict, temp_df):
+        vars = [v for v in self.sum_vars
+            if self.vars[v]['type'] != 'numeric']
         for var in vars:
-            val_counts = self.df[var].value_counts()
-            N = self.sum_stats[var]['N']
-            self.sum_stats[var]['value_counts'] = {index:count/N
-                for index, count in zip(val_counts.index, val_counts)}
+            val_counts = temp_df[var].value_counts()/sg_dict[var]['N']
+            sg_dict[var]['val_counts'] = list(
+                zip(val_counts.index, val_counts))
