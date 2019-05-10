@@ -22,13 +22,14 @@ Data:
 class TableCreator():
     def __init__(
             self, df=None, y=None, X=[], sum_vars=[], 
-            vgroups=[], hgroups=[]):
+            vgroups=[], hgroups=[], tgroups=[]):
         self.df(df)
         self.y(y)
         self.X(X)
         self.sum_vars(sum_vars)
         self.vgroups(vgroups)
         self.hgroups(hgroups)
+        self.tgroups(tgroups)
         
         self._vars = {}
         self.infer_labels()
@@ -69,18 +70,28 @@ class TableCreator():
     # i.e. list of vars to use as groupings along the table's vertical axis
     # vgroups: string (variable name) or list of variable names or None
     def vgroups(self, vgroups):
-        if type(vgroups) == str:
-            vgroups = [vgroups]
-        self._vgroups = vgroups
+        self._vgroups = self._groups(vgroups)
         
     # Set the horizontal groupings
     # i.e. list of vars to use as groupings along the table's horizontal axis
     # hgroups: string (variable name) or list of variable names or None
     def hgroups(self, hgroups):
-        if type(hgroups) == str:
-            hgroups = [hgroups]
-        self._hgroups = hgroups
+        self._hgroups = self._groups(hgroups)
         
+    # Set the table groupings
+    # i.e. list of vars to use as groupings by table
+    # tgroups: string (variable name) or list of variable names or None
+    def tgroups(self, tgroups):
+        self._tgroups = self._groups(tgroups)
+        
+    # Return a list of group variable names
+    def _groups(self, groups):
+        if groups is None:
+            return []
+        if type(groups) == str:
+            return [groups]
+        return groups
+    
         
         
     ###########################################################################
@@ -204,9 +215,33 @@ class TableCreator():
         # percentiles: {quantile_i: xxx},
         # categories: {category_i: xxx}
         # }}}}
-    def create_table(self):
+    def create_tables(self):
+        tables = []
+        for tgroup_var in self._tgroups:
+            series, subgroups = self._get_series_subgroups(tgroup_var)
+            for sg in subgroups:
+                self._tgroup_df = self._df[series==sg]
+                self._compute_sum_stats()
+                tables.append(
+                    Table(self._vars, self._sum_vars, self._sum_stats))
+        self._tgroup_df = self._df
         self._compute_sum_stats()
-        return Table(self._vars, self._sum_vars, self._sum_stats)
+        tables.append(Table(self._vars, self._sum_vars, self._sum_stats))
+        return tables
+        
+        
+    # Return a pd series containing values of subgroups and list of subgroups
+    # construct series as categories or quantiles (if numeric)
+    # group_var: str
+    def _get_series_subgroups(self, group_var, df=None):
+        if df is None:
+            df = self._df
+        if self._vars[group_var]['type'] == 'numeric':
+            series = pd.qcut(
+                df[group_var], self._vars[group_var]['group_pctile'])
+        else:
+            series = df[group_var]
+        return (series, series.unique())
         
     # Compute sum_vars statistics
     def _compute_sum_stats(self):
@@ -220,13 +255,8 @@ class TableCreator():
     # create a series indicating membership to subgroup based on vgroup_var
     # compute sum_vars stats for each subgroup
     def _get_stats_by_vgroup(self, vgroup_var):
-        if self._vars[vgroup_var]['type'] != 'numeric':
-            series = self._df[vgroup_var]
-        else:
-            series = pd.qcut(
-                self._df[vgroup_var], self._vars[vgroup_var]['group_pctile'])
-                
-        subgroups = series.unique()
+        series, subgroups = self._get_series_subgroups(
+            vgroup_var, self._tgroup_df)
         self._sum_stats[vgroup_var] = {sg: {} for sg in subgroups}
         [self._get_stats_by_value(sg, self._sum_stats[vgroup_var], series) 
             for sg in subgroups]
@@ -238,55 +268,54 @@ class TableCreator():
     def _get_stats_by_value(self, sg, vgroup_dict, series=None, pooled=False):
         vgroup_dict[sg] = {sum_var: {} for sum_var in self._sum_vars}
         if pooled:
-            temp_df = self._df
+            self._vgroup_df = self._tgroup_df
         else:
-            temp_df = self._df[series==sg]
-        self._N(vgroup_dict[sg], temp_df)
-        self._mean(vgroup_dict[sg], temp_df)
-        self._std(vgroup_dict[sg], temp_df)
-        self._pctiles(vgroup_dict[sg], temp_df)
-        self._counts(vgroup_dict[sg], temp_df)
+            self._vgroup_df = self._tgroup_df[series==sg]
+        self._N(vgroup_dict[sg])
+        self._mean(vgroup_dict[sg])
+        self._std(vgroup_dict[sg])
+        self._pctiles(vgroup_dict[sg])
+        self._counts(vgroup_dict[sg])
         
     # Compute number of observations N
     # sg_dict: {subgroup: {sum_vars variable: {}}}
-    # temp_df: df containing only members of subgroup
-    def _N(self, sg_dict, temp_df):
+    def _N(self, sg_dict):
         vars = self._sum_vars
-        counts = temp_df[vars].count()
+        counts = self._vgroup_df[vars].count()
         for var in vars:
             sg_dict[var]['N'] = counts[var]
         
     # Compute mean
-    def _mean(self, sg_dict, temp_df):
+    def _mean(self, sg_dict):
         vars = [v for v in self._sum_vars 
             if self._vars[v]['type'] != 'category']
-        means = temp_df[vars].mean()
+        means = self._vgroup_df[vars].mean()
         for var in vars:
             sg_dict[var]['mean'] = means[var]
         
     # Compute standard deviation
-    def _std(self, sg_dict, temp_df):
+    def _std(self, sg_dict):
         vars = [v for v in self._sum_vars
             if self._vars[v]['type'] != 'category']
-        stds = temp_df[vars].std()
+        stds = self._vgroup_df[vars].std()
         for var in vars:
             sg_dict[var]['std'] = stds[var]
         
     # Compute percentiles
-    def _pctiles(self, sg_dict, temp_df):
+    def _pctiles(self, sg_dict):
         vars = [v for v in self._sum_vars
             if self._vars[v]['type'] == 'numeric']
         for var in vars:
             pctiles = self._vars[var]['cell_pctile']
-            vals = temp_df[var].quantile(pctiles)
+            vals = self._vgroup_df[var].quantile(pctiles)
             sg_dict[var]['pctiles'] = [(pctile, val) 
                 for pctile, val in zip(pctiles, vals)]
             
     # Compute counts (as a percent of total N)
-    def _counts(self, sg_dict, temp_df):
+    def _counts(self, sg_dict):
         vars = [v for v in self._sum_vars
             if self._vars[v]['type'] != 'numeric']
         for var in vars:
-            val_counts = temp_df[var].value_counts()/sg_dict[var]['N']
+            val_counts = self._vgroup_df[var].value_counts()/sg_dict[var]['N']
             sg_dict[var]['val_counts'] = list(
                 zip(val_counts.index, val_counts))

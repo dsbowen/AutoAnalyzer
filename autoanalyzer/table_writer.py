@@ -89,7 +89,7 @@ class TableWriter():
             
         try:
             for pctile, val in sum_var_dict['pctiles']:
-                cell += 'p={}: {:.2f} \n'.format(pctile, val)
+                cell += 'p{} = {:.2f} \n'.format(pctile, val)
         except:
             for val, count, in sum_var_dict['val_counts']:
                 cell += '{}: {:.2f} \n'.format(val, count)
