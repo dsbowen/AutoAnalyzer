@@ -1,4 +1,4 @@
-from autoanalyzer import TableWriter, TableSet, Summary, Analysis
+from autoanalyzer import TableWriter, Table, TableGenerator, Summary, Analysis
 import statsmodels.api as sm
 import pandas as pd
 
@@ -10,17 +10,17 @@ import pandas as pd
 # ts = TableSet(tw, tgroup='SecondEstPreferred', vgroup='Question')
 # summary = Summary(ts, title, [summary variables])
 # analysis = Analysis(ts, title, y, [regressors], [controls], cov_type, cov_kwds, cons=True)
-# ts.generate()
+# tg.generate()
 # tw.write()
 
-ts = TableSet(title='Test title', df=pd.read_csv('data.csv'), tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
-print(ts._title)
-print(ts._vars)
-print(ts._tgroups)
-print(ts._vgroups)
-print(ts.generate())
-print(ts._tgroups)
-tw = TableWriter(file_name='results', tables=ts.generate())
+tw = TableWriter(file_name='results')
+tg = TableGenerator(
+    table_writer=tw, title='Test title', df=pd.read_csv('data.csv'), 
+    tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
+summary = Summary(tg, vars=['Truth'], title='sum1')
+summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
+print(tg._blocks)
+[print(t._blocks) for t in tg.generate()]
 tw.write()
 print(tw._vgroup_index)
 
@@ -43,14 +43,14 @@ df['_const'] = pd.DataFrame.from_dict({'_const':[1]*len(df)})
 
 print(sum(df.AvgBetterPreferred)/len(df))
 results = sm.OLS(df['AvgBetterPreferred'], df['_const']).fit(hasconst=True, cov_type='cluster', cov_kwds={'groups':df['workerId']})
-print(results.summary())
+print(resultg.summary())
 
-print(results.bse)
-print(results.fvalue, results.f_pvalue)
-print(results.pvalues)
-print(results.rsquared)
-print(results.params)
-print('t', results.tvalues)
+print(resultg.bse)
+print(resultg.fvalue, resultg.f_pvalue)
+print(resultg.pvalues)
+print(resultg.rsquared)
+print(resultg.params)
+print('t', resultg.tvalues)
 '''
 
 # Analysis:

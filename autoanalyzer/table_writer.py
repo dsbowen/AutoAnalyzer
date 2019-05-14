@@ -1,16 +1,19 @@
 ##############################################################################
 # Table Writer
 # by Dillon Bowen
-# last modified 05/13/2019
+# last modified 05/14/2019
 ##############################################################################
 
+from autoanalyzer.table_generator import TableGenerator
 from autoanalyzer.table import Table
+from autoanalyzer.private.writer_base import WriterBase
 import xlsxwriter
 
-class TableWriter():
-    def __init__(self, file_name=None, tables=[]):
+class TableWriter(WriterBase):
+    def __init__(self, file_name=None):
         self.file_name(file_name)
-        self.tables(tables)
+        self._tables = []
+        self._generated_tables = []
         self._row = self._col = 0
         
     # Set file name
@@ -19,21 +22,24 @@ class TableWriter():
             file_name = '_Results'
         self._file_name = file_name
         
-    # Set tables
-    # tables: [Table]
-    def tables(self, tables=[]):
-        if type(tables) == Table:
-            tables = [tables]
-        self._tables = tables
-        
     # Write tables
     def write(self):
-        self._init_table()
-        [self._write_table(table) for table in self._tables]
+        self._generate_tables()
+        self._init_workbook()
+        [self._write_table(table) for table in self._generated_tables]
         self._wb.close()
         
-    # Initialize a new table to write
-    def _init_table(self):
+    # Generate tables
+    def _generate_tables(self):
+        self._generated_tables = []
+        for table in self._tables:
+            if type(table) == TableGenerator:
+                self._generated_tables.extend(table.generate())
+            else:
+                self._generated_tables.append(table.generate())
+        
+    # Initialize a new workbook to write
+    def _init_workbook(self):
         self._wb = xlsxwriter.Workbook(self._file_name+'.xlsx')
         self._add_formats()
         self._ws = self._wb.add_worksheet('Sheet1')
@@ -54,17 +60,23 @@ class TableWriter():
    # Write a single table to the workbook
     def _write_table(self, table):
         self._table = table
-        self._write_title()
-        self._write_title(self._table._tgroup_title)
-        self._block_row_start = self._row
+        self._write_table_title()
+        self._write_table_title(self._table._tgroup_title)
+        block_row_start = self._row
+        self._row += 2
         self._write_vgroups()
+        col = 1
+        for b in table._blocks:
+            b._write(
+                block_row_start, col, self._ws, 
+                self._format['center_bold'], self._format['default'])
+            col += b._ncols
             
     # Write title
-    def _write_title(self, title=None):
+    def _write_table_title(self, title=None):
         if title is None:
             title = self._table._title
-        self._ws.merge_range(
-            self._row, 1, self._row, self._table._ncols,
+        self._write_title(self._row, 1, self._row, self._table._ncols,
             title, self._format['center_bold'])
         self._row += 1
         

@@ -1,26 +1,31 @@
 ##############################################################################
 # Table
 # by Dillon Bowen
-# last modified 05/13/2019
+# last modified 05/14/2019
 ##############################################################################
 
-class Table():
-    def __init__(self, table_set):
-        self.title(table_set._title)
-        self.vars(table_set._vars)
-        self.tgroup_title(table_set._tgroup, table_set._tgroup_val)
-        self._vars = table_set._vars
-        self._vgroups = table_set._vgroups
+from autoanalyzer.private.table_base import TableBase
+from copy import deepcopy
+
+'''
+Data:
+    title
+    vars: {var: {'label', 'type', 'group_pctile', 'cell_pctile'}}
+    tgroup_title: subtitle from table group variable
+    df: pandas DataFrame
+    vgroups: {vgroup: [group values]}
+    blocks: summary and analysis blocks
+    ncols: number of columns
+'''
+class Table(TableBase):
+    def __init__(self, table_generator):
+        self._title = table_generator._title
+        self._vars = deepcopy(table_generator._vars)
+        self.tgroup_title(table_generator._tgroup, table_generator._tgroup_val)
+        self._df = table_generator._tgroup_df
+        self._vgroups = deepcopy(table_generator._vgroups)
+        self._blocks = deepcopy(table_generator._blocks)
         self._ncols = 10
-        
-    # Set main table title
-    def title(self, title='Untitled'):
-        self._title = title
-        
-    # Set variables dict
-    # {var:{label, type, group_pctiles, cell_pctiles}
-    def vars(self, vars={}):
-        self._vars = vars
         
     # Set table group title (subtitle)
     def tgroup_title(self, tgroup, tgroup_val):
@@ -28,6 +33,29 @@ class Table():
             self._tgroup_title = 'Pooled'
             return
         self._tgroup_title = self._vars[tgroup]['label']+' = '+str(tgroup_val)
+
+    # Generate table statistics
+    def generate(self):
+        [self._generate_by_vgroup(v) for v in self._vgroups]
+        self._generate_by_vgroup_val(pooled=True)
+        return self
+        
+    # Generate table statistics by vertical group variable
+    def _generate_by_vgroup(self, vgroup):
+        self._vgroup = vgroup
+        series, values = self._get_series_values(vgroup)
+        values = sorted(list(values))
+        self._vgroups[vgroup] = values
+        [self._generate_by_vgroup_val(series, v) for v in values]
+        
+    # Generate statistics for a single value of the vertical group variable
+    # analysis may be pooled over vertical group variable
+    def _generate_by_vgroup_val(self, series=None, val=None, pooled=False):
+        if pooled:
+            self._vgroup_df = self._df
+        else:
+            self._vgroup_df = self._df[series==val]
+        
 
 '''
 Data:
