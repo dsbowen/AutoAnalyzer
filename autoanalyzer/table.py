@@ -24,7 +24,8 @@ class Table(TableBase):
         self.tgroup_title(table_generator._tgroup, table_generator._tgroup_val)
         self._df = table_generator._tgroup_df
         self._vgroups = deepcopy(table_generator._vgroups)
-        self._blocks = deepcopy(table_generator._blocks)
+        self._blocks = []
+        [b.table(self) for b in deepcopy(table_generator._blocks)]
         self._ncols = 10
         
     # Set table group title (subtitle)
@@ -51,12 +52,12 @@ class Table(TableBase):
     # Generate statistics for a single value of the vertical group variable
     # analysis may be pooled over vertical group variable
     def _generate_by_vgroup_val(self, series=None, val=None, pooled=False):
+        self._vgroup_val = val
         if pooled:
             self._vgroup_df = self._df
         else:
             self._vgroup_df = self._df[series==val]
-        
-
+        [block.generate() for block in self._blocks]
 '''
 Data:
     title: str

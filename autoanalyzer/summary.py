@@ -12,6 +12,7 @@ class Summary(WriterBase):
         self.table(table)
         self.title(title)
         self.vars(vars)
+        self._cells = {}
         
     # Set the Table or TableGenerator to which this summary block belongs
     def table(self, table=None):
@@ -38,10 +39,27 @@ class Summary(WriterBase):
     # Generate summary statistics
     ###########################################################################
     
-    # Generate summary statistics
+    # Generate summary statistics cells
     # must be assigned to a table
+    # cells: {vgroup: {vgroup_val: {var: data}}}
     def generate(self):
-        pass
+        vgroup, vgroup_val = self._table._vgroup, self._table._vgroup_val
+        if vgroup not in self._cells:
+            self._cells[vgroup] = {}
+        self._cells[vgroup][vgroup_val] = {v: 'data' for v in self._vars}
+        
+    def _generate_by_vgroup(self, vgroup):
+        print(vgroup)
+        self._cells[vgroup] = {v: {} for v in self._table._vgroups[vgroup]}
+        print('summary', self._table._vgroups)
+        [self._generate_by_vgroup_val(self._cells[vgroup], val)
+            for val in self._table._vgroups[vgroup]]
+            
+    def _generate_by_vgroup_val(self, vgroup_dict, vgroup_val):
+        vgroup_dict[vgroup_val] = {var: 'data' for var in self._vars}
+        # cell has vgroup, vgroup_val, data
+        # data is a list of rows in cell
+        # cells[vgroup][vgroup_val][var] = data
         
     
     

@@ -19,10 +19,11 @@ tg = TableGenerator(
     tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
 summary = Summary(tg, vars=['Truth'], title='sum1')
 summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
-print(tg._blocks)
-[print(t._blocks) for t in tg.generate()]
+table = tg.generate()[0]
+summary = table._blocks[0]
+print(summary)
+print(summary._cells)
 tw.write()
-print(tw._vgroup_index)
 
 '''
 df = pd.read_csv('data.csv')
