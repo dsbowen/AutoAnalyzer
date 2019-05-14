@@ -21,8 +21,9 @@ Data:
 '''
 class TableCreator():
     def __init__(
-            self, df=None, y=None, X=[], sum_vars=[], 
+            self, title=None, df=None, y=None, X=[], sum_vars=[], 
             vgroups=[], hgroups=[], tgroups=[]):
+        self.title(title)
         self.df(df)
         self.y(y)
         self.X(X)
@@ -36,6 +37,10 @@ class TableCreator():
         self.infer_types()
         self.infer_group_pctiles()
         self.infer_cell_pctiles()
+        
+    # Set title
+    def title(self, title=None):
+        self._title = title
         
     # Set the dataframe
     # df: pandas data frame or None
@@ -218,15 +223,17 @@ class TableCreator():
     def create_tables(self):
         tables = []
         for tgroup_var in self._tgroups:
+            self._tgroup = tgroup_var
             series, subgroups = self._get_series_subgroups(tgroup_var)
             for sg in subgroups:
+                self._sg = sg
                 self._tgroup_df = self._df[series==sg]
                 self._compute_sum_stats()
-                tables.append(
-                    Table(self._vars, self._sum_vars, self._sum_stats))
+                tables.append(Table(self))
+        self._tgroup, self._sg = 'Pooled', None
         self._tgroup_df = self._df
         self._compute_sum_stats()
-        tables.append(Table(self._vars, self._sum_vars, self._sum_stats))
+        tables.append(Table(self))
         return tables
         
         
@@ -246,9 +253,9 @@ class TableCreator():
     # Compute sum_vars statistics
     def _compute_sum_stats(self):
         self._sum_stats = {vgroup_var: {} 
-            for vgroup_var in self._vgroups+['pooled']}
+            for vgroup_var in self._vgroups+['Pooled']}
         [self._get_stats_by_vgroup(vgroup_var) for vgroup_var in self._vgroups]
-        self._get_stats_by_value('---', self._sum_stats['pooled'], pooled=True)
+        self._get_stats_by_value('---', self._sum_stats['Pooled'], Pooled=True)
         
     # Compute sum_vars stats by vgroup variable
     # vgroup_var: from self.vgroups
@@ -265,9 +272,9 @@ class TableCreator():
     # sg: subgroup
     # vgroup_dict: {vgroup_var: {}}
     # series: indicates membership to subgroup
-    def _get_stats_by_value(self, sg, vgroup_dict, series=None, pooled=False):
+    def _get_stats_by_value(self, sg, vgroup_dict, series=None, Pooled=False):
         vgroup_dict[sg] = {sum_var: {} for sum_var in self._sum_vars}
-        if pooled:
+        if Pooled:
             self._vgroup_df = self._tgroup_df
         else:
             self._vgroup_df = self._tgroup_df[series==sg]
