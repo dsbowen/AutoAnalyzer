@@ -1,10 +1,11 @@
 ##############################################################################
 # Table
 # by Dillon Bowen
-# last modified 05/14/2019
+# last modified 05/15/2019
 ##############################################################################
 
 from autoanalyzer.private.table_base import TableBase
+from autoanalyzer.private.writer_base import WriterBase, POOLED_VAL
 from copy import deepcopy
 
 '''
@@ -17,7 +18,7 @@ Data:
     blocks: summary and analysis blocks
     ncols: number of columns
 '''
-class Table(TableBase):
+class Table(TableBase, WriterBase):
     def __init__(self, table_generator):
         self._title = table_generator._title
         self._vars = deepcopy(table_generator._vars)
@@ -26,7 +27,7 @@ class Table(TableBase):
         self._vgroups = deepcopy(table_generator._vgroups)
         self._blocks = []
         [b.table(self) for b in deepcopy(table_generator._blocks)]
-        self._ncols = 10
+        self._ncols = sum([b._ncols for b in table_generator._blocks])
         
     # Set table group title (subtitle)
     def tgroup_title(self, tgroup, tgroup_val):
@@ -35,9 +36,16 @@ class Table(TableBase):
             return
         self._tgroup_title = self._vars[tgroup]['label']+' = '+str(tgroup_val)
 
+
+
+    ##########################################################################
+    # Generate table statistics
+    ##########################################################################
+    
     # Generate table statistics
     def generate(self):
         [self._generate_by_vgroup(v) for v in self._vgroups]
+        self._vgroup = 'Pooled'
         self._generate_by_vgroup_val(pooled=True)
         return self
         
@@ -52,59 +60,57 @@ class Table(TableBase):
     # Generate statistics for a single value of the vertical group variable
     # analysis may be pooled over vertical group variable
     def _generate_by_vgroup_val(self, series=None, val=None, pooled=False):
-        self._vgroup_val = val
         if pooled:
             self._vgroup_df = self._df
+            self._vgroup_val = POOLED_VAL
         else:
             self._vgroup_df = self._df[series==val]
+            self._vgroup_val = val
         [block.generate() for block in self._blocks]
-'''
-Data:
-    title: str
-    vars: {'var_name': {'type', 'label', 'cell_pctiles', 'group_pctiles'}}
-    sum_vars: ['var_name']
-    sum_stats: {'vgroup_var_name': {'subgroup': {'sum_var_name': {
-        'mean': xxx,
-        'std': xxx,
-        'skewness': xxx,
-        'kurtosis': xxx,
-        'percentiles': {'quantile_i': xxx},
-        'categories': {'category_i': xxx}
-        }}}}
-'''
-'''
-class Table():
-    def __init__(self, table_creator):
-        self.title(table_creator._title)
-        self.vars(table_creator._vars)
-        self.sum_vars(table_creator._sum_vars)
-        self.sum_stats(table_creator._sum_stats)
-        self.tgroup_title(table_creator._tgroup, table_creator._sg)
+    
+    
+    
+    ##########################################################################
+    # Write table
+    ##########################################################################
+    
+    def _write(self, ws, row, format):
+        self._ws, self._row, self._format = ws, row, format
+        self._write_table_title()
+        self._write_table_title(self._tgroup_title)
+        block_row_start = self._row
+        self._row += 2
+        self._write_vgroups()
+        col = 1
+        for b in self._blocks:
+            b._write(
+                block_row_start, col, 
+                self._ws, self._format, self._vgroup_index)
+            col += b._ncols
+        return self._row
         
-    # Set title
-    def title(self, title):
-        self._title = title
+    def _write_table_title(self, title=None):
+        if title is None:
+            title = self._title
+        self._write_title(
+            self._row, 1, self._row, self._ncols, 
+            title, self._format['center_bold'])
+        self._row += 1
         
-    # Set table group title
-    # tgroup: table group variable name
-    # subgroup: subgroup value
-    def tgroup_title(self, tgroup, subgroup):
-        if tgroup == 'Pooled':
-            self._tgroup_title = 'Pooled'
-            return
-        self._tgroup_title = self._vars[tgroup]['label']+' = '+str(subgroup)
+    def _write_vgroups(self):
+        vgroups = list(self._vgroups)+['Pooled']
+        self._vgroup_index = {vgroup: {} for vgroup in vgroups}
+        [self._write_vgroup(v) for v in vgroups]
+        self._row += 1
         
-    # Set table variables
-    # vars: {'var_name':{'label':label, 'type':type, '
-    def vars(self, vars={}):
-        self._vars = vars
-        
-    # Set summary variables
-    def sum_vars(self, sum_vars=[]):
-        self._sum_vars = sum_vars
-        
-    # Set summary statistics
-    # sum_stats is a dict of attributes keyed by vgroup (see Data sum_stats)
-    def sum_stats(self, sum_stats={}):
-        self._sum_stats = sum_stats
-'''
+    def _write_vgroup(self, vgroup):
+        if vgroup == 'Pooled':
+            label, vals = 'Pooled', [POOLED_VAL]
+        else:
+            label, vals = self._vars[vgroup]['label'], self._vgroups[vgroup]
+        self._ws.write(self._row, 0, label, self._format['bold'])
+        for val in vals:
+            self._row += 1
+            self._ws.write(self._row, 0, str(val), self._format['default'])
+            self._vgroup_index[vgroup][val] = self._row
+        self._row += 2

@@ -1,7 +1,7 @@
 ##############################################################################
 # Table Set
 # by Dillon Bowen
-# last modified 05/14/2019
+# last modified 05/15/2019
 ##############################################################################
 
 from autoanalyzer.table import Table
@@ -48,9 +48,15 @@ class TableGenerator(TableBase):
     
     # Generate list of tables
     def generate(self):
+        self._add_constant_column()
         tables = []
         [tables.extend(self._generate_by_tgroup(t)) for t in self._tgroups]
         return tables + [self._generate_by_tgroup_val(pooled=True)]
+        
+    # Add constant column to dataframe
+    def _add_constant_column(self):
+        self._df['_const'] = 1
+        self.labels({'_const': 'Constant'})
         
     # Generate list of tables split by table group variable
     def _generate_by_tgroup(self, tgroup):
