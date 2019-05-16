@@ -12,9 +12,9 @@ import xlsxwriter
 class TableWriter(WriterBase):
     def __init__(self, file_name=None):
         self.file_name(file_name)
+        self._worksheets = {}
         self._tables = []
         self._generated_tables = []
-        self._row = self._col = 0
         
     # Set file name
     def file_name(self, file_name=None):
@@ -42,8 +42,6 @@ class TableWriter(WriterBase):
     def _init_workbook(self):
         self._wb = xlsxwriter.Workbook(self._file_name+'.xlsx')
         self._add_formats()
-        self._ws = self._wb.add_worksheet('Sheet1')
-        self._ws.set_column(0, 99, width=20)
         
     # Add formats to the workbook
     def _add_formats(self):
@@ -59,4 +57,10 @@ class TableWriter(WriterBase):
            
     # Write a single table to the workbook
     def _write_table(self, table):
-        self._row = table._write(self._ws, self._row, self._format) - 1
+        ws_title = table._ws_title
+        if ws_title not in self._worksheets:
+            ws = self._wb.add_worksheet(ws_title)
+            ws.set_column(0, 99, width=20)
+            self._worksheets[ws_title] = [ws, 0]
+        self._worksheets[ws_title][1] = table._write(
+            *self._worksheets[ws_title], self._format) - 1

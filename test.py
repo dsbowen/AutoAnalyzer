@@ -22,12 +22,18 @@ df['AvgBetterPreferred'] = (
 
 tw = TableWriter(file_name='results')
 tg = TableGenerator(
-    table_writer=tw, title='Test title', df=df, 
+    table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
     tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
-tg.labels({
+labels = {
     'SecondEst':'Second Estimate',
-    'SecondEstBetter': '% Second Estimate Preferred to First'})
+    'SecondEstBetter': '% Second Estimate Preferred to First'
+    }
+tg.labels(labels)
 summary = Summary(tg, vars=['Truth'], title='sum1')
 summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
-analysis = Analysis(tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
+tg = TableGenerator(
+    tw, title='Test title 2', worksheet='TestWS2', df=df)
+tg.labels(labels)
+analysis = Analysis(
+    tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
 tw.write()

@@ -19,10 +19,11 @@ Data:
 '''
 class TableGenerator(TableBase):
     def __init__(
-            self, table_writer=None, title='Untitled', df=pd.DataFrame(),
-            tgroups=[], vgroups=[]):
+            self, table_writer=None, worksheet=None, title='Untitled', 
+            df=pd.DataFrame(), tgroups=[], vgroups=[]):
         self.table_writer(table_writer)
         self.title(title)
+        self.worksheet(worksheet)
         self.df(df)
         self.tgroups(tgroups)
         self.vgroups(vgroups)

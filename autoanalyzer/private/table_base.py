@@ -21,6 +21,10 @@ class TableBase():
     def title(self, title='Untitled'):
         self._title = title
         
+    # Set the worksheet title
+    def worksheet(self, worksheet='Main'):
+        self._ws_title = worksheet
+        
     # Set dataframe
     def df(self, df=pd.DataFrame()):
         self._df = df
