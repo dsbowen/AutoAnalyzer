@@ -3,8 +3,8 @@ import statsmodels.api as sm
 import pandas as pd
 
 # TODO
-# sheets
 # clean and comment
+# custom DataFrame with labeling and types
 
 df = pd.read_csv('data.csv')
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])

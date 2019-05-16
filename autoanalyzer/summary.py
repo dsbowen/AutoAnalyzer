@@ -48,7 +48,7 @@ class Summary(BlockBase):
             
     def _std(self):
         vars = [v for v in self._vars
-            if self._table._vars[v]['type'] != 'category']
+            if self._table._vars[v]['type'] in ['binary','ordered','numeric']]
         stds = self._table._vgroup_df[vars].std()
         [self._row_cells[v].std(stds[v]) for v in vars]
         
@@ -63,7 +63,7 @@ class Summary(BlockBase):
     
     def _freq(self):
         vars = [v for v in self._vars
-            if self._table._vars[v]['type'] != 'numeric']
+            if self._table._vars[v]['type'] in ['category','binary','ordered']]
         for v in vars:
             val_counts = self._table._vgroup_df[v].value_counts()
             val_counts = val_counts / self._row_cells[v]._N

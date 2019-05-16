@@ -27,15 +27,18 @@ class SummaryCell():
         self._freq = freq
         
     def _write(self, ws, row, col, format):
-        text = '{:.2f} \n ({:.2f}) \n'.format(self._mean, self._std)
-            
+        text = ''
+        if self._mean is not None:
+            text += '{:.2f} \n'.format(self._mean)
+        if self._std is not None:
+            text += '({:.2f}) \n'.format(self._std)
         if self._pctiles is not None:
             for pctile, val in self._pctiles:
                 text += 'p{} = {:.2f} \n'.format(pctile, val)
-        else:
+        if self._freq is not None:
             for val, freq in self._freq:
                 text += '{}: {:.2f} \n'.format(val, freq)
-                
-        text += 'N={}'.format(self._N)
+        if self._N is not None:
+            text += 'N={}'.format(self._N)
 
         ws.write(row, col, text, format)
