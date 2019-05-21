@@ -1,4 +1,4 @@
-from autoanalyzer import Writer, Table, TableGenerator, Summary, Analysis
+from autoanalyzer import *
 import statsmodels.api as sm
 import pandas as pd
 
@@ -6,7 +6,7 @@ import pandas as pd
 # clean and comment
 # custom DataFrame with labeling and types
 
-df = pd.read_csv('data.csv')
+df = read_csv('data.csv')
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
 df['AvgEst'] = (df['FirstEst'] + df['SecondEst']) / 2
 df['AvgEstDeviation'] = abs(df['AvgEst'] - df['Truth'])
@@ -38,3 +38,4 @@ tg.labels(labels)
 analysis = Analysis(
     tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
 tw.write()
+'''
