@@ -20,22 +20,26 @@ df['PreferredEstDeviation'] = abs(df['PreferredEst'] - df['Truth'])
 df['AvgBetterPreferred'] = (
     df['AvgEstDeviation'] < df['PreferredEstDeviation']).astype(int)
 
-tw = Writer(file_name='results')
-tg = TableGenerator(
-    table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
-    tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
-labels = {
-    'SecondEst':'Second Estimate',
-    'SecondEstBetter': '% Second Estimate Preferred to First'
-    }
-tg.labels(labels)
-tg.types({'Truth':'unary'})
-summary = Summary(tg, vars=['Truth'], title='sum1')
-summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
-tg = TableGenerator(
-    tw, title='Test title 2', worksheet='TestWS2', df=df)
-tg.labels(labels)
-analysis = Analysis(
-    tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
-tw.write()
-'''
+w = Writer(file_name='results')
+tg = TableGenerator(w, df=df)
+Summary(tg, vars=['SecondEst', 'SecondEstBetter'])
+w.write()
+
+# tw = Writer(file_name='results')
+# tg = TableGenerator(
+    # table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
+    # tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
+# labels = {
+    # 'SecondEst':'Second Estimate',
+    # 'SecondEstBetter': '% Second Estimate Preferred to First'
+    # }
+# tg.labels(labels)
+# tg.types({'Truth':'unary'})
+# summary = Summary(tg, vars=['Truth'], title='sum1')
+# summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
+# tg = TableGenerator(
+    # tw, title='Test title 2', worksheet='TestWS2', df=df)
+# tg.labels(labels)
+# analysis = Analysis(
+    # tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
+# tw.write()

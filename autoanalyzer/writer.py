@@ -12,7 +12,7 @@ Data:
     file_name
     worksheets: {ws title: [Worksheet, current row]}
     tables: [Table or TableGenerator]
-    generated_tables: [Table (after generate)]
+    generated_tables: [Table] after generate()
 '''
 class Writer():
     def __init__(self, file_name=None):
@@ -71,4 +71,4 @@ class Writer():
             self._worksheets[ws_title] = [ws, 0]
             
         self._worksheets[ws_title][1] = table._write(
-            *self._worksheets[ws_title], self._format) - 1
+            *self._worksheets[ws_title]) - 1
