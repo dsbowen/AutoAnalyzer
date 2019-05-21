@@ -5,8 +5,6 @@
 ##############################################################################
 
 from autoanalyzer.table_generator import TableGenerator
-from autoanalyzer.table import Table
-from autoanalyzer.bases.writer_base import WriterBase, POOLED_VAL
 import xlsxwriter
 
 '''
@@ -16,7 +14,7 @@ Data:
     tables: [Table or TableGenerator]
     generated_tables: [Table (after generate)]
 '''
-class Writer(WriterBase):
+class Writer():
     def __init__(self, file_name=None):
         self.file_name(file_name)
         self._worksheets = {}
