@@ -40,6 +40,7 @@ class Summary(BlockBase):
     # Generate summary statistics cells
     # must be assigned to a table
     def generate(self):
+        self._df = self._table._vgroup_df
         self._init_row('summary')
         self._N()
         self._mean()

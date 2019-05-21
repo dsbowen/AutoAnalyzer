@@ -215,3 +215,17 @@ class DataFrame(pd.DataFrame):
     def _clear_attr(self, attr):
         for v in self._decorated_vars(attr):
             self._vars[v][attr] = None
+            
+    def __getitem__(self, key):
+        df = DataFrame(pd.DataFrame(self)[key])
+        df._vars = self._vars
+        return df
+        
+    def __setitem__(self, index, value):
+        df = pd.DataFrame(self)
+        print(index)
+        print(value)
+        df[index] = value
+        df = DataFrame(df)
+        df._vars = self._vars
+        self = df

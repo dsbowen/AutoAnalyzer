@@ -21,10 +21,6 @@ class BlockBase(WriterBase, Base):
     def table(self, table=None):
         self._parent(
             new_parent=table, parent_attr='_table', child_attr='_blocks')
-        if table is not None:
-            self._df = table._df
-        else:
-            self._df = DataFrame()
         
     # Initialize row of cells
     # type: type of block

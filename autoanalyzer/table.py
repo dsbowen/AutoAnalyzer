@@ -77,6 +77,7 @@ class Table(TableBase, WriterBase):
             self._vgroup_val = POOLED_VAL
         else:
             self._vgroup_df = self._df[series==val]
+            print(self._vgroup_df._vars)
             self._vgroup_val = val
         [b.generate() for b in self._blocks]
     
@@ -133,7 +134,8 @@ class Table(TableBase, WriterBase):
         if vgroup == 'Pooled':
             label, vals = 'Pooled', [POOLED_VAL]
         else:
-            label, vals = self._vars[vgroup]['label'], self._vgroups[vgroup]
+            label = self._df._vars[vgroup]['label']
+            vals = self._vgroups[vgroup]
             
         self._ws.write(self._row, 0, label, self._format['bold'])
         for val in vals:

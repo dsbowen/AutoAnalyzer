@@ -7,7 +7,15 @@ import pandas as pd
 # custom DataFrame with labeling and types
 
 df = read_csv('data.csv')
-df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
+# df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
+x = abs(df['FirstEst'] - df['Truth'])
+print('x', x)
+print(type(x))
+df = pd.read_csv('data.csv')
+x = abs(df['FirstEst'] - df['Truth'])
+print('x', x)
+print(type(x))
+'''
 df['AvgEst'] = (df['FirstEst'] + df['SecondEst']) / 2
 df['AvgEstDeviation'] = abs(df['AvgEst'] - df['Truth'])
 df['AvgBetterFirst'] = (
@@ -20,11 +28,17 @@ df['PreferredEstDeviation'] = abs(df['PreferredEst'] - df['Truth'])
 df['AvgBetterPreferred'] = (
     df['AvgEstDeviation'] < df['PreferredEstDeviation']).astype(int)
 
+df.labels({
+    'SecondEst': 'Second Estimate',
+    'FirstEst': 'First Estimate',
+    'preference_label': 'Preference question',
+    'SecondEstBetter': '% of Time Second Estimate is Preferred to First Estimate'})
+
 w = Writer(file_name='results')
-tg = TableGenerator(w, df=df)
+tg = TableGenerator(w, df=df, vgroups=['FirstEst', 'preference_label'])
 Summary(tg, vars=['SecondEst', 'SecondEstBetter'])
 w.write()
-
+'''
 # tw = Writer(file_name='results')
 # tg = TableGenerator(
     # table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
