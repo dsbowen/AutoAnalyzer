@@ -4,8 +4,8 @@
 # last modified 05/15/2019
 ##############################################################################
 
-from autoanalyzer.private.table_base import TableBase
-from autoanalyzer.private.writer_base import WriterBase, POOLED_VAL
+from autoanalyzer.bases.table_base import TableBase
+from autoanalyzer.bases.writer_base import WriterBase, POOLED_VAL
 from copy import deepcopy
 
 '''

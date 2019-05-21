@@ -4,8 +4,8 @@
 # last modified 05/15/2019
 ##############################################################################
 
-from autoanalyzer.private.block_base import BlockBase
-from autoanalyzer.private.writer_base import POOLED_VAL
+from autoanalyzer.bases.block_base import BlockBase
+from autoanalyzer.bases.writer_base import POOLED_VAL
 import xlsxwriter
 
 class Summary(BlockBase):

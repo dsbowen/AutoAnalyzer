@@ -5,7 +5,7 @@
 ##############################################################################
 
 from autoanalyzer.table import Table
-from autoanalyzer.private.table_base import TableBase
+from autoanalyzer.bases.table_base import TableBase
 import pandas as pd
 
 '''

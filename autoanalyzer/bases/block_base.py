@@ -4,9 +4,9 @@
 # last modified 05/15/2019
 ##############################################################################
 
-from autoanalyzer.private.summary_cell import SummaryCell
-from autoanalyzer.private.analysis_cell import AnalysisCell
-from autoanalyzer.private.writer_base import WriterBase, POOLED_VAL
+from autoanalyzer.cells.summary_cell import SummaryCell
+from autoanalyzer.cells.analysis_cell import AnalysisCell
+from autoanalyzer.bases.writer_base import WriterBase, POOLED_VAL
 
 class BlockBase(WriterBase):
     # Initialize block

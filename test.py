@@ -1,4 +1,4 @@
-from autoanalyzer import TableWriter, Table, TableGenerator, Summary, Analysis
+from autoanalyzer import Writer, Table, TableGenerator, Summary, Analysis
 import statsmodels.api as sm
 import pandas as pd
 
@@ -20,7 +20,7 @@ df['PreferredEstDeviation'] = abs(df['PreferredEst'] - df['Truth'])
 df['AvgBetterPreferred'] = (
     df['AvgEstDeviation'] < df['PreferredEstDeviation']).astype(int)
 
-tw = TableWriter(file_name='results')
+tw = Writer(file_name='results')
 tg = TableGenerator(
     table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
     tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
@@ -29,6 +29,7 @@ labels = {
     'SecondEstBetter': '% Second Estimate Preferred to First'
     }
 tg.labels(labels)
+tg.types({'Truth':'unary'})
 summary = Summary(tg, vars=['Truth'], title='sum1')
 summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
 tg = TableGenerator(
