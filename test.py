@@ -7,6 +7,16 @@ import pandas as pd
 # custom DataFrame with labeling and types
 
 df = read_csv('data.csv')
+df.labels({
+    'SecondEst':'Second Estimate',
+    'FirstEst':'First Estimate'})
+df['TotalEst'] = 1
+df['TotalEst'] = df['FirstEst'] + df['SecondEst']
+df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
+print(df['FirstEstDeviation'])
+
+'''
+df = read_csv('data.csv')
 # df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
 x = abs(df['FirstEst'] - df['Truth'])
 print('x', x)
@@ -15,6 +25,7 @@ df = pd.read_csv('data.csv')
 x = abs(df['FirstEst'] - df['Truth'])
 print('x', x)
 print(type(x))
+'''
 '''
 df['AvgEst'] = (df['FirstEst'] + df['SecondEst']) / 2
 df['AvgEstDeviation'] = abs(df['AvgEst'] - df['Truth'])

@@ -215,17 +215,99 @@ class DataFrame(pd.DataFrame):
     def _clear_attr(self, attr):
         for v in self._decorated_vars(attr):
             self._vars[v][attr] = None
+    
+    
+    
+    ##########################################################################
+    # Operator overload
+    ##########################################################################
+    
+    # Generic overload operation
+    # convert autoanalyzer DataFrames to pandas DataFrames
+    # create new DataFrame by calling function on the pandas DataFrame
+    # assign variable decorations and return
+    def _overload(self, f, args=None):
+        args = self._to_pandas(args)
+        df = self._to_pandas(self)
+        
+        if args is None:
+            df = DataFrame(getattr(df, f)())
+        else:
+            df = DataFrame(getattr(df, f)(*args))
             
-    def __getitem__(self, key):
-        df = DataFrame(pd.DataFrame(self)[key])
-        df._vars = self._vars
+        df._vars = {v:self._vars[v] for v in self._vars if v in df}
         return df
         
-    def __setitem__(self, index, value):
-        df = pd.DataFrame(self)
-        print(index)
-        print(value)
-        df[index] = value
-        df = DataFrame(df)
-        df._vars = self._vars
-        self = df
+    # Convert arguments to pandas DataFrames and Series
+    def _to_pandas(self, args):
+        if type(args) == DataFrame:
+            keys = args.keys()
+            if len(keys) == 1:
+                keys = keys[0]
+            return pd.DataFrame(args)[keys]
+        if type(args) == list:
+            return [self._to_pandas(a) for a in args]
+        if type(args) == dict:
+            return {k:self._to_pandas(v) for k, v in args}
+        return args
+    
+    def __abs__(self):
+        return self._overload('__abs__')
+    
+    def __add__(self, other):
+        return self._overload('__add__', [other])
+        
+    def __and__(self, other):
+        return self._overload('__and__', [other])
+        
+    def __eq__(self, other):
+        return self._overload('__eq__', [other])
+        
+    def __floordiv__(self, other):
+        return self._overload('__floordiv__', [other])
+        
+    def __ge__(self, other):
+        return self._overload('__ge__', [other])
+        
+    def __gt__(self, other):
+        return self._overload('__gt__', [other])
+        
+    def __iadd__(self, other):
+        return self._overload('__iadd__', [other])
+        
+    def __iand__(self, other):
+        return self._overload('__iand__', [other])
+        
+    def __ifloordiv__(self, other):
+        return self._overload('__ifloordiv__', [other])
+        
+    def __imod__(self, other):
+        return self._overload('__imod__', [other])
+        
+    def __imul__(self, other):
+        return self._overload('__imul__', [other])
+        
+    def __invert__(self):
+        return self._overload('__invert__')
+        
+    def __ior__(self, other):
+        return self._overload('__ior__', [other])
+        
+    def __ipow__(self, other):
+        return self._overload('__ipow__', [other])
+        
+    def __isub__(self, other):
+        return self._overload('__isub__', [other])
+        
+    def __itruediv__(self, other):
+        return self._overload('__itruediv__', [other])
+        
+    def __ixor__(self, other):
+        return self._overload('__ixor__', [other])
+    
+    def __getitem__(self, key):
+        return self._overload('__getitem__', [key])
+    
+    def __sub__(self, other):
+        return self._overload('__sub__', [other])
+    
