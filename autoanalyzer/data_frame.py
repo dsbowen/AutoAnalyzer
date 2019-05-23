@@ -12,8 +12,8 @@ def read_csv(csv):
     return _read(pd.read_csv(csv))
     
 # Create DataFrame from xlsx
-def read_xlsx(xlsx):
-    return _read(pd.read_xlsx(xlsx))
+def read_excel(excel):
+    return _read(pd.read_excel(excel))
     
 def _read(out):
     if type(out) == pd.DataFrame:
