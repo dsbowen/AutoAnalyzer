@@ -1,9 +1,16 @@
 ##############################################################################
 # Analysis Cell
 # by Dillon Bowen
-# last modified 05/15/2019
+# last modified 05/23/2019
 ##############################################################################
 
+'''
+Data:
+    param: [parameter mean]
+    bse: [parameter standard error]
+    tvalue: [t value for parameter == 0]
+    pvalue: [p value for parameter == 0]
+'''
 class AnalysisCell():
     _param = None
     _bse = None

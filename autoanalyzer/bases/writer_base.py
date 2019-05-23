@@ -4,6 +4,7 @@
 # last modified 05/15/2019
 ##############################################################################
 
+# Value for the pooled group
 POOLED_VAL = '---'
 
 class WriterBase():

@@ -43,6 +43,10 @@ class TableBase(Base):
     def get_vgroups(self):
         return list(self._vgroups)
         
+    # Get number of columns
+    def ncols(self):
+        return sum([b.ncols() for b in self._blocks])
+        
     # Convert single group as string to list
     def _groups(self, groups):
         if type(groups) == str:

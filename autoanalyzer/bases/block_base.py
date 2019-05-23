@@ -71,6 +71,7 @@ class BlockBase(WriterBase, Base):
     def _collect_write_args(self, row, col):
         self._row_num = row
         self._col_num = col
+        self._df = self._table._df
         self._ws = self._table._ws
         self._format = self._table._format
         self._vgroup_index = self._table._vgroup_index
@@ -79,7 +80,7 @@ class BlockBase(WriterBase, Base):
     def _write_block_title(self):
         row = self._row_num
         start_col = self._col_num
-        end_col = start_col + self._ncols-1
+        end_col = start_col + self.ncols()-1
         self._write_title(
             row, start_col, row, end_col, 
             self._title, self._format['center_bold'])

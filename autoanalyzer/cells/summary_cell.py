@@ -1,9 +1,17 @@
 ##############################################################################
 # Summary Cell
 # by Dillon Bowen
-# last modified 05/15/2019
+# last modified 05/23/2019
 ##############################################################################
 
+'''
+Data:
+    N: number of observations
+    mean
+    std: standard deviation
+    pctiles: [(pctile, val)]
+    freq: [(val, freq)]
+'''
 class SummaryCell():
     _N = None
     _mean = None

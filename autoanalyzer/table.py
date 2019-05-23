@@ -15,7 +15,6 @@ Data:
     df: DataFrame
     vgroups: {vgroup: [group value]}
     blocks: summary and analysis blocks
-    ncols: number of columns
     row: row number
     vgroup_index: {vertical group variable value: row}
     writer: parent Writer
@@ -23,14 +22,15 @@ Data:
 class Table(TableBase, WriterBase):
     def __init__(self, table_generator):
         self._df = table_generator._tgroup_df
-        self._title = table_generator._title
         self._ws_title = table_generator._ws_title
+        self._title = table_generator._title
         self.tgroup_title(
             table_generator._tgroup, table_generator._tgroup_val)
         self._vgroups = deepcopy(table_generator._vgroups)
         self._blocks = []
-        [b.table(self) for b in deepcopy(table_generator._blocks)]
-        self._ncols = sum([b._ncols for b in self._blocks])
+        to_add = deepcopy(table_generator._blocks)
+        while to_add:
+            to_add.pop(0).table(self)
         self._writer = table_generator._writer
         
     # Set table group title (subtitle)
@@ -105,7 +105,7 @@ class Table(TableBase, WriterBase):
         col = 1
         for b in self._blocks:
             b._write(block_row_start, col)
-            col += b._ncols
+            col += b.ncols()
         return self._row
         
     # Write table title or subtitle
@@ -113,7 +113,7 @@ class Table(TableBase, WriterBase):
         if title is None:
             title = self._title
         self._write_title(
-            self._row, 1, self._row, self._ncols, 
+            self._row, 1, self._row, self.ncols(), 
             title, self._format['center_bold'])
         self._row += 1
         

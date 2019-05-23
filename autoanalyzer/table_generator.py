@@ -19,7 +19,7 @@ Data:
 '''
 class TableGenerator(TableBase):
     def __init__(
-            self, writer=None, worksheet=None, title='', 
+            self, writer=None, worksheet='Main', title='', 
             df=DataFrame(), tgroups=[], vgroups=[]):
         self.writer(writer)
         self.worksheet(worksheet)

@@ -14,7 +14,6 @@ Data:
     vars: [summary variable]
     cells: {vgroup: {vgroup_val: {var: SummaryCell}}}
     row: [cell] belonging to a particular vgroup value
-    ncols: number of columns
     table: parent Table
 '''
 class Summary(BlockBase):
@@ -25,11 +24,14 @@ class Summary(BlockBase):
     # Set the summary variables
     def vars(self, vars=[]):
         self._vars = vars
-        self._ncols = len(vars)
         
     # Get summary variables
     def get_vars(self):
         return self._vars
+        
+    # Number of columns (variables)
+    def ncols(self):
+        return len(self._vars)
     
     
     
@@ -93,7 +95,4 @@ class Summary(BlockBase):
     ##########################################################################
     
     def _write(self, row, col):
-        self._ws = self._table._ws
-        self._format = self._table._format
-        self._vgroup_index = self._table._vgroup_index
         self._write_block(row, col, 'summary')

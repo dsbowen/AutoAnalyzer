@@ -1,7 +1,7 @@
 ##############################################################################
 # Analysis Block
 # by Dillon Bowen
-# last modified 05/15/2019
+# last modified 05/23/2019
 ##############################################################################
 
 from autoanalyzer.bases.block_base import BlockBase
@@ -30,7 +30,6 @@ class Analysis(BlockBase):
         if type(regressors) == str:
             regressors = [regressors]
         self._regressors = regressors
-        self._ncols = len(regressors)
         
     def controls(self, controls=[]):
         if type(controls) == str:
@@ -45,21 +44,24 @@ class Analysis(BlockBase):
         
     def const(self, const=True):
         self._const = True
+        
+    def ncols(self):
+        return len(self._regressors)
     
     
     
-    ###########################################################################
+    ##########################################################################
     # Generate analysis statistics
-    ###########################################################################
+    ##########################################################################
     
     def generate(self):
-        self._init_cells('analysis')
+        self._init_row('analysis')
         results = self._generate_results()
-        [self._row_cells[v].param(results.params[v]) for v in self._regressors]
-        [self._row_cells[v].bse(results.bse[v]) for v in self._regressors]
-        [self._row_cells[v].tvalue(results.tvalues[v]) 
+        [self._row[v].param(results.params[v]) for v in self._regressors]
+        [self._row[v].bse(results.bse[v]) for v in self._regressors]
+        [self._row[v].tvalue(results.tvalues[v]) 
             for v in self._regressors]
-        [self._row_cells[v].pvalue(results.pvalues[v]) 
+        [self._row[v].pvalue(results.pvalues[v]) 
             for v in self._regressors]
         
     def _generate_results(self):
@@ -70,16 +72,16 @@ class Analysis(BlockBase):
             X.append('_const')
             
         if 'groups' in self._cov_kwds:
-            cov_kwds = {'groups': df[self._cov_kwds['groups']]}
+            cov_kwds = {'groups': df[self._cov_kwds['groups']].data}
             
-        return sm.OLS(df[self._y], df[X]).fit(
+        return sm.OLS(df[self._y].data, df[X].data).fit(
             cov_type=self._cov_type, cov_kwds=cov_kwds)
     
     
     
-    ###########################################################################
+    ##########################################################################
     # Write analysis statistics
-    ###########################################################################
+    ##########################################################################
     
-    def _write(self, row, col, ws, format, vgroup_index):
-        self._write_block(row, col, ws, format, vgroup_index, 'analysis')
+    def _write(self, row, col):
+        self._write_block(row, col, 'analysis')

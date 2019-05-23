@@ -28,6 +28,8 @@ df.labels({
 w = Writer(file_name='results')
 tg = TableGenerator(w, title='Hello world', df=df, tgroups='SecondEstPreferred', vgroups=['FirstEst', 'preference_label'])
 Summary(tg, vars=['SecondEst', 'SecondEstPreferred', 'AvgBetterFirst'])
+Analysis(
+    tg, title='% of time average estimate is better than preferred', y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
 w.write()
 
 '''
