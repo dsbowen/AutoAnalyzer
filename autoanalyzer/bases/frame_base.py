@@ -20,9 +20,9 @@ class FrameBase():
         args = self._to_pandas(list(args), self._vars)
         kwargs = self._to_pandas(dict(kwargs), self._vars)
         if type(self) == DataFrame:
-            self._data = pd.DataFrame(*args, **kwargs)
+            self.data = pd.DataFrame(*args, **kwargs)
         elif type(self) == Series:
-            self._data = pd.Series(*args, **kwargs)
+            self.data = pd.Series(*args, **kwargs)
     
     
     
@@ -238,7 +238,7 @@ class FrameBase():
         args = self._to_pandas(list(args), vars)
         kwargs = self._to_pandas(dict(kwargs), vars)
         
-        method = getattr(self._data, f)
+        method = getattr(self.data, f)
         if not args and not kwargs:
             out = method()
         elif args and not kwargs:
@@ -260,7 +260,7 @@ class FrameBase():
         if type(args) == DataFrame or type(args) == Series:
             vars.update({v:args._vars[v] for v in args._vars
                 if v not in vars})
-            return args._data
+            return args.data
         if type(args) == list:
             return [self._to_pandas(a, vars) for a in args]
         if type(args) == dict:
@@ -279,11 +279,11 @@ class FrameBase():
             
         if type(out) == pd.DataFrame:
             out = DataFrame(out)
-            out._vars = {k:v for k,v in vars.items() if k in out._data}
+            out._vars = {k:v for k,v in vars.items() if k in out.data}
         elif type(out) == pd.Series:
             out = Series(out)
-            if out._data.name in vars:
-                out._vars = {out._data.name:vars[out._data.name]}
+            if out.data.name in vars:
+                out._vars = {out.data.name:vars[out.data.name]}
 
         return out
     

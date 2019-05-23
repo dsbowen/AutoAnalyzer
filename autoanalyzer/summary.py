@@ -1,7 +1,7 @@
 ##############################################################################
 # Summary Block
 # by Dillon Bowen
-# last modified 05/21/2019
+# last modified 05/23/2019
 ##############################################################################
 
 from autoanalyzer.bases.block_base import BlockBase
@@ -74,10 +74,7 @@ class Summary(BlockBase):
             if self._df._vars[v]['type'] == 'numeric']
         for v in vars:
             pctiles = self._df._vars[v]['cell_pctile']
-            vals = self._df[v].quantile(pctiles)[v]
-            print(pctiles, vals)
-            print(type(vals))
-            print(list(vals))
+            vals = self._df[v].quantile(pctiles)
             self._row[v].pctiles(list(zip(pctiles, vals)))
     
     # Compute value frequencies for a row of cells
@@ -87,7 +84,7 @@ class Summary(BlockBase):
         for v in vars:
             val_counts = self._df[v].value_counts()
             val_counts = val_counts / self._row[v]._N
-            self._row[v].freq(list(zip(val_counts.index, val_counts)))
+            self._row[v].freq(list(zip(val_counts.data.index, val_counts)))
     
     
     

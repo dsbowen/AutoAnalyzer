@@ -1,7 +1,7 @@
 ##############################################################################
 # Table Base
 # by Dillon Bowen
-# last modified 05/21/2019
+# last modified 05/23/2019
 ##############################################################################
 
 from autoanalyzer.data_frame import DataFrame
@@ -53,10 +53,10 @@ class TableBase(Base):
     def _get_series_values(self, group):
         if self._df._vars[group]['type'] == 'numeric':
             series = pd.qcut(
-                pd.DataFrame(self._df)[group], 
+                self._df[group].data, 
                 self._df._vars[group]['group_pctile'])
         else:
-            series = pd.DataFrame(self._df)[group]
+            series = self._df[group].data
         return (series, series.unique())
         
     # Add constant to DataFrame and decorate

@@ -21,22 +21,15 @@ df.labels({
     'SecondEst': 'Second Estimate',
     'FirstEst': 'First Estimate',
     'preference_label': 'Preference question',
-    'SecondEstBetter': '% of Time Second Estimate is Preferred to First Estimate'})
+    'SecondEstPreferred': '% of Time Second Estimate is Preferred to First Estimate',
+    'AvgBetterFirst':'% of time average estimate is better than first'})
 
-print(type(df))
-print(df.head())
-print(df.get_labels())
-'''
+
 w = Writer(file_name='results')
-tg = TableGenerator(w, df=df, vgroups=['FirstEst', 'preference_label'])
-Summary(tg, vars=['SecondEst', 'SecondEstBetter'])
-print('here')
-df.mean()
-print('there')
-df.count()
-print('here2')
+tg = TableGenerator(w, title='Hello world', df=df, tgroups='SecondEstPreferred', vgroups=['FirstEst', 'preference_label'])
+Summary(tg, vars=['SecondEst', 'SecondEstPreferred', 'AvgBetterFirst'])
 w.write()
-'''
+
 '''
 # tw = Writer(file_name='results')
 # tg = TableGenerator(

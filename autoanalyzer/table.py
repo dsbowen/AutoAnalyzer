@@ -1,7 +1,7 @@
 ##############################################################################
 # Table
 # by Dillon Bowen
-# last modified 05/21/2019
+# last modified 05/23/2019
 ##############################################################################
 
 from autoanalyzer.bases.table_base import TableBase
@@ -22,11 +22,11 @@ Data:
 '''
 class Table(TableBase, WriterBase):
     def __init__(self, table_generator):
+        self._df = table_generator._tgroup_df
         self._title = table_generator._title
         self._ws_title = table_generator._ws_title
         self.tgroup_title(
             table_generator._tgroup, table_generator._tgroup_val)
-        self._df = table_generator._tgroup_df
         self._vgroups = deepcopy(table_generator._vgroups)
         self._blocks = []
         [b.table(self) for b in deepcopy(table_generator._blocks)]
