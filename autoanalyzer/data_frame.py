@@ -9,7 +9,13 @@ import pandas as pd
 
 # Create DataFrame from csv
 def read_csv(csv):
-    out = pd.read_csv(csv)
+    return _read(pd.read_csv(csv))
+    
+# Create DataFrame from xlsx
+def read_xlsx(xlsx):
+    return _read(pd.read_xlsx(xlsx))
+    
+def _read(out):
     if type(out) == pd.DataFrame:
         return DataFrame(out)
     elif type(out) == pd.Series:
