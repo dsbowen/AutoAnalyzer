@@ -7,11 +7,12 @@
 from autoanalyzer.bases.frame_base import FrameBase
 import pandas as pd
 
+'''
+Data:
+    data: pandas Series
+    vars: {var: {'label', 'type', 'group_pctiles', 'cell_pctiles'}}
+'''
 class Series(FrameBase):
-    def __init__(self, *args, **kwargs):
-        self._data = pd.Series(*args, **kwargs)
-        self._var = {}
-        
     def T(self, *args, **kwargs):
         print("T")
         return self._overload('T', *args, **kwargs)
@@ -19,7 +20,6 @@ class Series(FrameBase):
     def _AXIS_ALIASES(self, *args, **kwargs):
         print("_AXIS_ALIASES")
         return self._overload('_AXIS_ALIASES', *args, **kwargs)
-
     def _AXIS_IALIASES(self, *args, **kwargs):
         print("_AXIS_IALIASES")
         return self._overload('_AXIS_IALIASES', *args, **kwargs)

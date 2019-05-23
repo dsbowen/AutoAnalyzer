@@ -6,11 +6,14 @@ from autoanalyzer import *
 print('in autoanalyzer')
 
 df = read_csv('data.csv')
-df2 = df[['ipv4','SecondEst']]
-df = df[['ipv4','FirstEst']]
-x = df.merge(df2, on='ipv4')
+df2 = df[['SecondEst']]
+# df2.labels({'SecondEst', 'Second Estimate'})
+df = df[['FirstEst']]
+# df.labels({'FirstEst', 'First Estimate'})
+x = df.merge(df2, left_index=True, right_index=True)
 print(type(x))
 print(x.head())
+# print(x.get_labels())
 
 '''
 df = read_csv('data.csv')
