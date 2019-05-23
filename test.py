@@ -3,6 +3,16 @@ from autoanalyzer import *
 # TODO
 # clean and comment
 
+print('in autoanalyzer')
+
+df = read_csv('data.csv')
+df2 = df[['ipv4','SecondEst']]
+df = df[['ipv4','FirstEst']]
+x = df.merge(df2, on='ipv4')
+print(type(x))
+print(x.head())
+
+'''
 df = read_csv('data.csv')
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
 df['AvgEst'] = (df['FirstEst'] + df['SecondEst']) / 2
@@ -22,7 +32,8 @@ df.labels({
     'FirstEst': 'First Estimate',
     'preference_label': 'Preference question',
     'SecondEstBetter': '% of Time Second Estimate is Preferred to First Estimate'})
-
+'''
+'''
 w = Writer(file_name='results')
 tg = TableGenerator(w, df=df, vgroups=['FirstEst', 'preference_label'])
 Summary(tg, vars=['SecondEst', 'SecondEstBetter'])
@@ -32,7 +43,7 @@ print('there')
 df.count()
 print('here2')
 w.write()
-
+'''
 '''
 # tw = Writer(file_name='results')
 # tg = TableGenerator(
