@@ -1,38 +1,10 @@
 from autoanalyzer import *
-import statsmodels.api as sm
-import pandas as pd
 
 # TODO
 # clean and comment
 
 df = read_csv('data.csv')
-df.labels({
-    'SecondEst':'Second Estimate',
-    'FirstEst':'First Estimate'})
-x = df['FirstEst']
-print(type(x))
-print(x.head())
-x = df['FirstEst'] + df['SecondEst']
-print(type(x))
-print(x.head())
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
-print(type(df))
-print(df.head())
-print(type(df['FirstEstDeviation']))
-print(df['FirstEstDeviation'].head())
-
-'''
-df = read_csv('data.csv')
-# df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
-x = abs(df['FirstEst'] - df['Truth'])
-print('x', x)
-print(type(x))
-df = pd.read_csv('data.csv')
-x = abs(df['FirstEst'] - df['Truth'])
-print('x', x)
-print(type(x))
-'''
-'''
 df['AvgEst'] = (df['FirstEst'] + df['SecondEst']) / 2
 df['AvgEstDeviation'] = abs(df['AvgEst'] - df['Truth'])
 df['AvgBetterFirst'] = (
@@ -54,7 +26,13 @@ df.labels({
 w = Writer(file_name='results')
 tg = TableGenerator(w, df=df, vgroups=['FirstEst', 'preference_label'])
 Summary(tg, vars=['SecondEst', 'SecondEstBetter'])
+print('here')
+df.mean()
+print('there')
+df.count()
+print('here2')
 w.write()
+
 '''
 # tw = Writer(file_name='results')
 # tg = TableGenerator(
@@ -74,3 +52,4 @@ w.write()
 # analysis = Analysis(
     # tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
 # tw.write()
+'''

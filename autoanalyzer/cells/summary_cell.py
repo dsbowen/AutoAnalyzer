@@ -27,6 +27,7 @@ class SummaryCell():
         self._freq = freq
         
     def _write(self, ws, row, col, format):
+        print(self._N, self._mean, self._std, self._pctiles, self._freq)
         text = ''
         if self._mean is not None:
             text += '{:.2f} \n'.format(self._mean)

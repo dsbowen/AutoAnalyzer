@@ -77,7 +77,6 @@ class Table(TableBase, WriterBase):
             self._vgroup_val = POOLED_VAL
         else:
             self._vgroup_df = self._df[series==val]
-            print(self._vgroup_df._vars)
             self._vgroup_val = val
         [b.generate() for b in self._blocks]
     

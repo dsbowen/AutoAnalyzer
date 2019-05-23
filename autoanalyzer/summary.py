@@ -74,7 +74,10 @@ class Summary(BlockBase):
             if self._df._vars[v]['type'] == 'numeric']
         for v in vars:
             pctiles = self._df._vars[v]['cell_pctile']
-            vals = self._df[v].quantile(pctiles)
+            vals = self._df[v].quantile(pctiles)[v]
+            print(pctiles, vals)
+            print(type(vals))
+            print(list(vals))
             self._row[v].pctiles(list(zip(pctiles, vals)))
     
     # Compute value frequencies for a row of cells

@@ -53,9 +53,10 @@ class TableBase(Base):
     def _get_series_values(self, group):
         if self._df._vars[group]['type'] == 'numeric':
             series = pd.qcut(
-                self._df[group], self._df._vars[group]['group_pctile'])
+                pd.DataFrame(self._df)[group], 
+                self._df._vars[group]['group_pctile'])
         else:
-            series = self._df[group]
+            series = pd.DataFrame(self._df)[group]
         return (series, series.unique())
         
     # Add constant to DataFrame and decorate
