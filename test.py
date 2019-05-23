@@ -4,16 +4,22 @@ import pandas as pd
 
 # TODO
 # clean and comment
-# custom DataFrame with labeling and types
 
 df = read_csv('data.csv')
 df.labels({
     'SecondEst':'Second Estimate',
     'FirstEst':'First Estimate'})
-df['TotalEst'] = 1
-df['TotalEst'] = df['FirstEst'] + df['SecondEst']
+x = df['FirstEst']
+print(type(x))
+print(x.head())
+x = df['FirstEst'] + df['SecondEst']
+print(type(x))
+print(x.head())
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
-print(df['FirstEstDeviation'])
+print(type(df))
+print(df.head())
+print(type(df['FirstEstDeviation']))
+print(df['FirstEstDeviation'].head())
 
 '''
 df = read_csv('data.csv')

@@ -226,14 +226,19 @@ class DataFrame(pd.DataFrame):
     # convert autoanalyzer DataFrames to pandas DataFrames
     # create new DataFrame by calling function on the pandas DataFrame
     # assign variable decorations and return
-    def _overload(self, f, args=None):
-        args = self._to_pandas(args)
+    def _overload(self, f, *args, **kwargs):
+        args = self._to_pandas(list(args))
+        kwargs = self._to_pandas(dict(kwargs))
         df = self._to_pandas(self)
         
-        if args is None:
+        if not args and not kwargs:
             df = DataFrame(getattr(df, f)())
-        else:
+        elif args and not kwargs:
             df = DataFrame(getattr(df, f)(*args))
+        elif not args and kwargs:
+            df = DataFrame(getattr(df, f)(**kwargs))
+        else:
+            df = DataFrame(getattr(df, f)(*args, **kwargs))
             
         df._vars = {v:self._vars[v] for v in self._vars if v in df}
         return df
@@ -250,64 +255,144 @@ class DataFrame(pd.DataFrame):
         if type(args) == dict:
             return {k:self._to_pandas(v) for k, v in args}
         return args
-    
-    def __abs__(self):
-        return self._overload('__abs__')
-    
-    def __add__(self, other):
-        return self._overload('__add__', [other])
         
-    def __and__(self, other):
-        return self._overload('__and__', [other])
+    def __abs__(self, *args, **kwargs):
+        return self._overload('__abs__', *args, **kwargs)
+
+    def __add__(self, *args, **kwargs):
+        return self._overload('__add__', *args, **kwargs)
+
+    def __and__(self, *args, **kwargs):
+        return self._overload('__and__', *args, **kwargs)
+
+    def __div__(self, *args, **kwargs):
+        return self._overload('__div__', *args, **kwargs)
+
+    def __eq__(self, *args, **kwargs):
+        return self._overload('__eq__', *args, **kwargs)
+
+    def __floordiv__(self, *args, **kwargs):
+        return self._overload('__floordiv__', *args, **kwargs)
+
+    def __ge__(self, *args, **kwargs):
+        return self._overload('__ge__', *args, **kwargs)
+
+    def __getitem__(self, *args, **kwargs):
+        return self._overload('__getitem__', *args, **kwargs)
+
+    def __gt__(self, *args, **kwargs):
+        return self._overload('__gt__', *args, **kwargs)
+
+    def __iadd__(self, *args, **kwargs):
+        return self._overload('__iadd__', *args, **kwargs)
+
+    def __iand__(self, *args, **kwargs):
+        return self._overload('__iand__', *args, **kwargs)
+
+    def __ifloordiv__(self, *args, **kwargs):
+        return self._overload('__ifloordiv__', *args, **kwargs)
+
+    def __imod__(self, *args, **kwargs):
+        return self._overload('__imod__', *args, **kwargs)
+
+    def __imul__(self, *args, **kwargs):
+        return self._overload('__imul__', *args, **kwargs)
+
+    def __invert__(self, *args, **kwargs):
+        return self._overload('__invert__', *args, **kwargs)
+
+    def __ior__(self, *args, **kwargs):
+        return self._overload('__ior__', *args, **kwargs)
+
+    def __ipow__(self, *args, **kwargs):
+        return self._overload('__ipow__', *args, **kwargs)
+
+    def __isub__(self, *args, **kwargs):
+        return self._overload('__isub__', *args, **kwargs)
+
+    def __itruediv__(self, *args, **kwargs):
+        return self._overload('__itruediv__', *args, **kwargs)
+
+    def __ixor__(self, *args, **kwargs):
+        return self._overload('__ixor__', *args, **kwargs)
+
+    def __le__(self, *args, **kwargs):
+        return self._overload('__le__', *args, **kwargs)
+
+    def __lt__(self, *args, **kwargs):
+        return self._overload('__lt__', *args, **kwargs)
+
+    def __matmul__(self, *args, **kwargs):
+        return self._overload('__matmul__', *args, **kwargs)
+
+    def __mod__(self, *args, **kwargs):
+        return self._overload('__mod__', *args, **kwargs)
+
+    def __mul__(self, *args, **kwargs):
+        return self._overload('__mul__', *args, **kwargs)
+
+    def __ne__(self, *args, **kwargs):
+        return self._overload('__ne__', *args, **kwargs)
+
+    def __neg__(self, *args, **kwargs):
+        return self._overload('__neg__', *args, **kwargs)
+
+    def __nonzero__(self, *args, **kwargs):
+        return self._overload('__nonzero__', *args, **kwargs)
+
+    def __or__(self, *args, **kwargs):
+        return self._overload('__or__', *args, **kwargs)
+
+    def __pos__(self, *args, **kwargs):
+        return self._overload('__pos__', *args, **kwargs)
+
+    def __pow__(self, *args, **kwargs):
+        return self._overload('__pow__', *args, **kwargs)
+
+    def __radd__(self, *args, **kwargs):
+        return self._overload('__radd__', *args, **kwargs)
+
+    def __rand__(self, *args, **kwargs):
+        return self._overload('__rand__', *args, **kwargs)
+
+    def __rdiv__(self, *args, **kwargs):
+        return self._overload('__rdiv__', *args, **kwargs)
+
+    def __rfloordiv__(self, *args, **kwargs):
+        return self._overload('__rfloordiv__', *args, **kwargs)
+
+    def __rmatmul__(self, *args, **kwargs):
+        return self._overload('__rmatmul__', *args, **kwargs)
+
+    def __rmod__(self, *args, **kwargs):
+        return self._overload('__rmod__', *args, **kwargs)
+
+    def __rmul__(self, *args, **kwargs):
+        return self._overload('__rmul__', *args, **kwargs)
+
+    def __ror__(self, *args, **kwargs):
+        return self._overload('__ror__', *args, **kwargs)
+
+    def __round__(self, *args, **kwargs):
+        return self._overload('__round__', *args, **kwargs)
+
+    def __rpow__(self, *args, **kwargs):
+        return self._overload('__rpow__', *args, **kwargs)
+
+    def __rsub__(self, *args, **kwargs):
+        return self._overload('__rsub__', *args, **kwargs)
+
+    def __rtruediv__(self, *args, **kwargs):
+        return self._overload('__rtruediv__', *args, **kwargs)
+
+    def __rxor__(self, *args, **kwargs):
+        return self._overload('__rxor__', *args, **kwargs)
         
-    def __eq__(self, other):
-        return self._overload('__eq__', [other])
-        
-    def __floordiv__(self, other):
-        return self._overload('__floordiv__', [other])
-        
-    def __ge__(self, other):
-        return self._overload('__ge__', [other])
-        
-    def __gt__(self, other):
-        return self._overload('__gt__', [other])
-        
-    def __iadd__(self, other):
-        return self._overload('__iadd__', [other])
-        
-    def __iand__(self, other):
-        return self._overload('__iand__', [other])
-        
-    def __ifloordiv__(self, other):
-        return self._overload('__ifloordiv__', [other])
-        
-    def __imod__(self, other):
-        return self._overload('__imod__', [other])
-        
-    def __imul__(self, other):
-        return self._overload('__imul__', [other])
-        
-    def __invert__(self):
-        return self._overload('__invert__')
-        
-    def __ior__(self, other):
-        return self._overload('__ior__', [other])
-        
-    def __ipow__(self, other):
-        return self._overload('__ipow__', [other])
-        
-    def __isub__(self, other):
-        return self._overload('__isub__', [other])
-        
-    def __itruediv__(self, other):
-        return self._overload('__itruediv__', [other])
-        
-    def __ixor__(self, other):
-        return self._overload('__ixor__', [other])
-    
-    def __getitem__(self, key):
-        return self._overload('__getitem__', [key])
-    
-    def __sub__(self, other):
-        return self._overload('__sub__', [other])
-    
+    def __sub__(self, *args, **kwargs):
+        return self._overload('__sub__', *args, **kwargs)
+
+    def __truediv__(self, *args, **kwargs):
+        return self._overload('__truediv__', *args, **kwargs)
+
+    def __xor__(self, *args, **kwargs):
+        return self._overload('__xor__', *args, **kwargs)
