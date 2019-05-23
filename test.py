@@ -23,6 +23,9 @@ df.labels({
     'preference_label': 'Preference question',
     'SecondEstBetter': '% of Time Second Estimate is Preferred to First Estimate'})
 
+print(type(df))
+print(df.head())
+print(df.get_labels())
 '''
 w = Writer(file_name='results')
 tg = TableGenerator(w, df=df, vgroups=['FirstEst', 'preference_label'])
