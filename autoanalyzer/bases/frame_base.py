@@ -5,6 +5,7 @@
 ##############################################################################
 
 import pandas as pd
+from copy import deepcopy
 
 class FrameBase():
     # Initialize DataFrame or Series
@@ -15,9 +16,9 @@ class FrameBase():
         from autoanalyzer.data_frame import DataFrame
         from autoanalyzer.series import Series
         
-        args = self._to_pandas(list(args))
-        kwargs = self._to_pandas(dict(kwargs))
-        self._vars = {}
+        self._vars = dict()
+        args = self._to_pandas(list(args), self._vars)
+        kwargs = self._to_pandas(dict(kwargs), self._vars)
         if type(self) == DataFrame:
             self._data = pd.DataFrame(*args, **kwargs)
         elif type(self) == Series:
@@ -233,8 +234,9 @@ class FrameBase():
     # set output by calling function on the pandas DataFrame/Series
     # convert output from pandas and return
     def _overload(self, f, *args, **kwargs):
-        args = self._to_pandas(list(args))
-        kwargs = self._to_pandas(dict(kwargs))
+        vars = deepcopy(self._vars)
+        args = self._to_pandas(list(args), vars)
+        kwargs = self._to_pandas(dict(kwargs), vars)
         
         method = getattr(self._data, f)
         if not args and not kwargs:
@@ -246,32 +248,42 @@ class FrameBase():
         else:
             out = method(*args, **kwargs)
             
-        return self._from_pandas(out)
+        return self._from_pandas(out, vars)
         
     # Convert arguments to pandas DataFrames and Series
-    def _to_pandas(self, args):
+    # if args is DataFrame/Series, update variable dictionary
+    # cascade conversion over lists and dicts
+    def _to_pandas(self, args, vars):
         from autoanalyzer.data_frame import DataFrame
         from autoanalyzer.series import Series
     
         if type(args) == DataFrame or type(args) == Series:
+            vars.update({v:args._vars[v] for v in args._vars
+                if v not in vars})
             return args._data
         if type(args) == list:
-            return [self._to_pandas(a) for a in args]
+            return [self._to_pandas(a, vars) for a in args]
         if type(args) == dict:
-            return {k:self._to_pandas(v) for k, v in args.items()}
+            return {k:self._to_pandas(v, vars) for k, v in args.items()}
+            
         return args
         
     # Convert output from pandas DataFrame and Series
-    def _from_pandas(self, out):
+    # if args is DataFrame/Series, update variables dict
+    def _from_pandas(self, out, vars):
         from autoanalyzer.data_frame import DataFrame
         from autoanalyzer.series import Series
         
         if type(out) != pd.DataFrame and type(out) != pd.Series:
             return out
+            
         if type(out) == pd.DataFrame:
             out = DataFrame(out)
+            out._vars = {k:v for k,v in vars.items() if k in out._data}
         elif type(out) == pd.Series:
             out = Series(out)
-        out._vars = {v:self._vars[v] for v in self._vars if v in out}
+            if out._data.name in vars:
+                out._vars = {out._data.name:vars[out._data.name]}
+
         return out
     
