@@ -10,6 +10,19 @@ from copy import deepcopy
 import statsmodels.api as sm
 import xlsxwriter
 
+'''
+Data:
+    title
+    y: response variable, dependent variable, label variable
+    regressors: independent variables, to be displayed in table
+    controls: control variables, will not be displayed in table
+    cov_type: covariance type (see statsmodels documentation)
+    cov_kwds: covariance keywords (see statsmodels documentation)
+    NOTE: cov_kwds refers to variable names here, but will be converted to
+        pandas Series for analysis
+    const: indicates constant should be included in regression
+    table: parent Table
+'''
 class Analysis(BlockBase):
     def __init__(
             self, table=None, y=None, regressors=[], controls=[],
@@ -23,28 +36,35 @@ class Analysis(BlockBase):
         self.cov_kwds(cov_kwds)
         self.const(const)
         
+    # Set dependent variable
     def y(self, y=None):
         self._y = y
         
+    # Set regressors
     def regressors(self, regressors=[]):
         if type(regressors) == str:
             regressors = [regressors]
         self._regressors = regressors
         
+    # Set controls
     def controls(self, controls=[]):
         if type(controls) == str:
             controls = [controls]
         self._controls = controls
         
+    # Set covariance type
     def cov_type(self, cov_type='nonrobust'):
         self._cov_type = cov_type
         
+    # Set covariance keywords
     def cov_kwds(self, cov_kwds={}):
         self._cov_kwds = cov_kwds
         
+    # Set indicator that constant is included in the regression
     def const(self, const=True):
         self._const = True
         
+    # Get the number of columns in output
     def ncols(self):
         return len(self._regressors)
     
@@ -54,6 +74,8 @@ class Analysis(BlockBase):
     # Generate analysis statistics
     ##########################################################################
     
+    # Generate a row of analysis statistics cells
+    # must be assigned to table
     def generate(self):
         self._init_row('analysis')
         results = self._generate_results()
@@ -64,6 +86,7 @@ class Analysis(BlockBase):
         [self._row[v].pvalue(results.pvalues[v]) 
             for v in self._regressors]
         
+    # Generates analysis results
     def _generate_results(self):
         df = deepcopy(self._table._vgroup_df)
             
