@@ -47,6 +47,10 @@ class TableBase(Base):
     def ncols(self):
         return sum([b.ncols() for b in self._blocks])
         
+    # Get blocks
+    def get_blocks(self):
+        return self._blocks
+        
     # Convert single group as string to list
     def _groups(self, groups):
         if type(groups) == str:

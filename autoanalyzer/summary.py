@@ -1,11 +1,12 @@
 ##############################################################################
 # Summary Block
 # by Dillon Bowen
-# last modified 05/23/2019
+# last modified 05/24/2019
 ##############################################################################
 
 from autoanalyzer.bases.block_base import BlockBase
 from autoanalyzer.bases.writer_base import POOLED_VAL
+from copy import deepcopy
 import xlsxwriter
 
 '''
@@ -23,6 +24,8 @@ class Summary(BlockBase):
         
     # Set the summary variables
     def vars(self, vars=[]):
+        if type(vars) == str:
+            vars = [vars]
         self._vars = vars
         
     # Get summary variables
@@ -32,7 +35,7 @@ class Summary(BlockBase):
     # Number of columns (variables)
     def ncols(self):
         return len(self._vars)
-    
+
     
     
     ##########################################################################
@@ -96,3 +99,14 @@ class Summary(BlockBase):
     
     def _write(self, row, col):
         self._write_block(row, col, 'summary')
+    
+    
+    
+    ##########################################################################
+    # Overload
+    ##########################################################################
+    
+    # Deepcopy makes a deep copy of Summary variables
+    # does not assign to memo Table or preserve cells
+    def __deepcopy__(self, memo):
+        return Summary(vars=deepcopy(self._vars), title=self._title)

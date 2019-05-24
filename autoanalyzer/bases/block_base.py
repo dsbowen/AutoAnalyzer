@@ -17,10 +17,14 @@ class BlockBase(WriterBase, Base):
         self.title(title)
         self._cells = {}
 
-    # Set the Table or TableGenerator to which this summary block belongs
+    # Set the parent Table or TableGenerator
     def table(self, table=None):
         self._parent(
             new_parent=table, parent_attr='_table', child_attr='_blocks')
+            
+    # Get the parent Table or TableGenerator
+    def get_table(self):
+        return self._table
         
     # Initialize row of cells
     # type: type of block

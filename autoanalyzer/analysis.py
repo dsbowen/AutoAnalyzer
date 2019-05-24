@@ -1,7 +1,7 @@
 ##############################################################################
 # Analysis Block
 # by Dillon Bowen
-# last modified 05/23/2019
+# last modified 05/24/2019
 ##############################################################################
 
 from autoanalyzer.bases.block_base import BlockBase
@@ -40,11 +40,19 @@ class Analysis(BlockBase):
     def y(self, y=None):
         self._y = y
         
+    # Get dependent variable
+    def get_y(self):
+        return self._y
+        
     # Set regressors
     def regressors(self, regressors=[]):
         if type(regressors) == str:
             regressors = [regressors]
         self._regressors = regressors
+        
+    # Get regressors
+    def get_regressors(self):
+        return deepcopy(self._regressors)
         
     # Set controls
     def controls(self, controls=[]):
@@ -52,17 +60,33 @@ class Analysis(BlockBase):
             controls = [controls]
         self._controls = controls
         
+    # Get controls
+    def get_controls(self):
+        return deepcopy(self._controls)
+        
     # Set covariance type
     def cov_type(self, cov_type='nonrobust'):
         self._cov_type = cov_type
+        
+    # Get covariance type
+    def get_cov_type(self):
+        return self._cov_type
         
     # Set covariance keywords
     def cov_kwds(self, cov_kwds={}):
         self._cov_kwds = cov_kwds
         
+    # Get covariance keywords
+    def get_cov_kwds(self):
+        return deepcopy(self._cov_kwds)
+        
     # Set indicator that constant is included in the regression
     def const(self, const=True):
         self._const = True
+        
+    # Get constant indicator
+    def get_const(self):
+        return self._const
         
     # Get the number of columns in output
     def ncols(self):
@@ -108,3 +132,19 @@ class Analysis(BlockBase):
     
     def _write(self, row, col):
         self._write_block(row, col, 'analysis')
+    
+    
+    
+    ##########################################################################
+    # Operator overload
+    ##########################################################################
+
+    # Create a deep copy of analysis block
+    # does not assign to parent Table or copy cells
+    def __deepcopy__(self, memo):
+        return Analysis(
+            y=self._y, 
+            regressors=deepcopy(self._regressors), 
+            controls=deepcopy(self._controls),
+            cov_type=self._cov_type, cov_kwds=deepcopy(self._cov_kwds), 
+            const=self._const, title=self._title)
