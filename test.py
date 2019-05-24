@@ -1,7 +1,9 @@
 from autoanalyzer import *
 
 # TODO
-# clean and comment
+# add hgroups to Summary block
+# more analyses (quantile, logit, probit, MNlogit, ordered logit/probit)
+# infer analyses
 
 df = read_csv('data.csv')
 df['FirstEstDeviation'] = abs(df['FirstEst'] - df['Truth'])
@@ -31,24 +33,3 @@ Summary(tg, vars=['SecondEst', 'SecondEstPreferred', 'AvgBetterFirst'])
 Analysis(
     tg, title='% of time average estimate is better than preferred', y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
 w.write()
-
-'''
-# tw = Writer(file_name='results')
-# tg = TableGenerator(
-    # table_writer=tw, title='Test title', worksheet='TestWS', df=df, 
-    # tgroups='SecondEstBetter', vgroups=['FirstEst', 'preference_label'])
-# labels = {
-    # 'SecondEst':'Second Estimate',
-    # 'SecondEstBetter': '% Second Estimate Preferred to First'
-    # }
-# tg.labels(labels)
-# tg.types({'Truth':'unary'})
-# summary = Summary(tg, vars=['Truth'], title='sum1')
-# summary = Summary(tg, vars=['SecondEstBetter', 'SecondEst'], title='sum2')
-# tg = TableGenerator(
-    # tw, title='Test title 2', worksheet='TestWS2', df=df)
-# tg.labels(labels)
-# analysis = Analysis(
-    # tg, y='AvgBetterPreferred', regressors=['_const'], cov_type='cluster', cov_kwds={'groups':'workerId'})
-# tw.write()
-'''
