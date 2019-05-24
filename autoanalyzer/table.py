@@ -1,7 +1,7 @@
 ##############################################################################
 # Table
 # by Dillon Bowen
-# last modified 05/23/2019
+# last modified 05/24/2019
 ##############################################################################
 
 from autoanalyzer.bases.table_base import TableBase
@@ -29,8 +29,7 @@ class Table(TableBase, WriterBase):
         self._vgroups = deepcopy(table_generator._vgroups)
         self._blocks = []
         to_add = deepcopy(table_generator._blocks)
-        while to_add:
-            to_add.pop(0).table(self)
+        [a.table(self) for a in to_add]
         self._writer = table_generator._writer
         
     # Set table group title (subtitle)
